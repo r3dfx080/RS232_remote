@@ -7,7 +7,7 @@ plugins {
 }
 
 group 'org.foxprod'
-version '1.0-SNAPSHOT'
+version '0.1'
 
 repositories {
     mavenCentral()
@@ -26,7 +26,7 @@ tasks.withType(JavaCompile) {
 
 application {
     mainModule = 'org.foxprod.rs232_remote'
-    mainClass = 'org.foxprod.rs232_remote.HelloApplication'
+    mainClass = 'org.foxprod.rs232_remote.Main'
 }
 
 javafx {
@@ -35,7 +35,7 @@ javafx {
 }
 
 dependencies {
-
+    implementation("com.fazecast:jSerialComm:[2.0.0,3.0.0)")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
 }
