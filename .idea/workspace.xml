@@ -4,16 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="85841248-5528-40c6-97e8-40cf812940b4" name="Changes" comment="Initial commit">
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
+    <list default="true" id="85841248-5528-40c6-97e8-40cf812940b4" name="Changes" comment="Start filling form, add icon and necessary libraries">
       <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/module-info.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/module-info.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/HelloApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/HelloController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/hello-view.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/MainView.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/MainView.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/MainView.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -78,9 +74,9 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 7
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
   <component name="ProjectId" id="2zNcXkvZc6s7wKrV7I5lMw0e5em" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
@@ -92,9 +88,9 @@
     "Downloaded.Files.Path.Enabled": "false",
     "Gradle.Build RS232_remote.executor": "Run",
     "Gradle.RS232_remote [:org.foxprod.rs232_remote.Main.main()].executor": "Run",
-    "Gradle.RS232_remote [clean].executor": "Run",
+    "Gradle.RS232_remote [clean].executor": "Debug",
     "Gradle.RS232_remote [dependencies].executor": "Run",
-    "Gradle.RS232_remote [run].executor": "Run",
+    "Gradle.RS232_remote [run].executor": "Debug",
     "Repository.Attach.Annotations": "false",
     "Repository.Attach.JavaDocs": "true",
     "Repository.Attach.Sources": "false",
@@ -113,7 +109,30 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Gradle.RS232_remote [run]">
+    <configuration name="RS232_remote [clean]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="clean" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <EXTENSION ID="com.haulmont.jmixstudio.buildsystem.gradle.runconfiguration.JmixGradleRunConfigurationExtension" isNew="true" />
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
     <configuration name="RS232_remote [run]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -140,6 +159,7 @@
     <recent_temporary>
       <list>
         <item itemvalue="Gradle.RS232_remote [run]" />
+        <item itemvalue="Gradle.RS232_remote [clean]" />
       </list>
     </recent_temporary>
   </component>
@@ -159,7 +179,9 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1751575013014</updated>
-      <workItem from="1751575014065" duration="1626000" />
+      <workItem from="1751575014065" duration="1964000" />
+      <workItem from="1751576986040" duration="2060000" />
+      <workItem from="1751579067244" duration="2481000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
@@ -169,7 +191,15 @@
       <option name="project" value="LOCAL" />
       <updated>1751575032473</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Start filling form, add icon and necessary libraries">
+      <option name="closed" value="true" />
+      <created>1751576813838</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1751576813838</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -188,6 +218,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Initial commit" />
-    <option name="LAST_COMMIT_MESSAGE" value="Initial commit" />
+    <MESSAGE value="Start filling form, add icon and necessary libraries" />
+    <option name="LAST_COMMIT_MESSAGE" value="Start filling form, add icon and necessary libraries" />
   </component>
 </project>

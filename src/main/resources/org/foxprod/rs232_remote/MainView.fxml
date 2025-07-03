@@ -1,11 +1,66 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.foxprod.rs232_remote.MainViewController">
    <children>
-      <HBox prefHeight="150.0" prefWidth="600.0" />
-      <HBox prefHeight="150.0" prefWidth="600.0" />
+      <MenuBar prefHeight="46.0" prefWidth="600.0">
+        <menus>
+          <Menu fx:id="portMenu" mnemonicParsing="false" text="Port" />
+        </menus>
+      </MenuBar>
+      <HBox alignment="CENTER" prefHeight="150.0" prefWidth="600.0">
+         <children>
+            <CheckBox mnemonicParsing="false" text="Optional">
+               <HBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </HBox.margin>
+            </CheckBox>
+            <Button mnemonicParsing="false" text="Button">
+               <HBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </HBox.margin>
+            </Button>
+            <Button mnemonicParsing="false" text="Button">
+               <HBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </HBox.margin>
+            </Button>
+            <Button mnemonicParsing="false" text="Button">
+               <HBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </HBox.margin>
+            </Button>
+         </children></HBox>
+      <HBox alignment="CENTER" prefHeight="150.0" prefWidth="600.0">
+         <children>
+          <Button mnemonicParsing="false" text="EJECT">
+               <HBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </HBox.margin>
+            </Button>
+            <Button mnemonicParsing="false" text="REW">
+               <HBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </HBox.margin>
+            </Button>
+            <Button mnemonicParsing="false" text="PLAY">
+               <HBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </HBox.margin>
+            </Button>
+            <Button mnemonicParsing="false" text="FF">
+               <HBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </HBox.margin>
+            </Button>
+            <Button mnemonicParsing="false" text="STOP">
+               <HBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </HBox.margin>
+            </Button>
+         </children></HBox>
    </children>
 </VBox>
