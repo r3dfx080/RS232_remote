@@ -36,27 +36,27 @@
          </children></HBox>
       <HBox alignment="CENTER" prefHeight="150.0" prefWidth="600.0">
          <children>
-          <Button mnemonicParsing="false" text="EJECT">
+          <Button fx:id="ejectBtn" mnemonicParsing="false" onAction="#onEjectPressed" text="EJECT">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
             </Button>
-            <Button mnemonicParsing="false" text="REW">
+            <Button fx:id="rewBtn" mnemonicParsing="false" onAction="#onRewPressed" text="REW">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
             </Button>
-            <Button mnemonicParsing="false" text="PLAY">
+            <Button fx:id="playBtn" mnemonicParsing="false" onAction="#onPlayPressed" text="PLAY">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
             </Button>
-            <Button mnemonicParsing="false" text="FF">
+            <Button fx:id="ffBtn" mnemonicParsing="false" onAction="#onFFPressed" text="FF">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
             </Button>
-            <Button mnemonicParsing="false" text="STOP">
+            <Button fx:id="stopBtn" mnemonicParsing="false" onAction="#onStopPressed" text="STOP">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>

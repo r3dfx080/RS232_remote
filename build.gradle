@@ -7,7 +7,7 @@ plugins {
 }
 
 group 'org.foxprod'
-version '0.1'
+version '0.2'
 
 repositories {
     mavenCentral()
@@ -48,7 +48,7 @@ jlink {
     imageZip = project.file("${buildDir}/distributions/app-${javafx.platform.classifier}.zip")
     options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
     launcher {
-        name = 'app'
+        name = 'RS232 remote'
     }
 }
 
