@@ -11,6 +11,16 @@
           <Menu fx:id="portMenu" mnemonicParsing="false" text="Port" />
         </menus>
       </MenuBar>
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+         <children>
+            <ComboBox fx:id="portsDropdown" prefWidth="150.0" />
+            <Button fx:id="openPortButton" mnemonicParsing="false" onAction="#onOpenPortPressed" text="Open">
+               <HBox.margin>
+                  <Insets left="5.0" />
+               </HBox.margin>
+            </Button>
+         </children>
+      </HBox>
       <HBox alignment="CENTER" prefHeight="150.0" prefWidth="600.0">
          <children>
             <CheckBox mnemonicParsing="false" text="Optional">

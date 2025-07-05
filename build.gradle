@@ -29,9 +29,14 @@ application {
     mainClass = 'org.foxprod.rs232_remote.Main'
 }
 
+jar {
+    manifest {
+        attributes "Main-Class": 'org.foxprod.rs232_remote.Main'
+    }
+}
 javafx {
     version = '21'
-    modules = ['javafx.controls', 'javafx.fxml']
+    modules = ['javafx.base','javafx.controls', 'javafx.fxml']
 }
 
 dependencies {
@@ -46,9 +51,20 @@ test {
 
 jlink {
     imageZip = project.file("${buildDir}/distributions/app-${javafx.platform.classifier}.zip")
-    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+    targetPlatform("win") {
+    }
+    options = ['--strip-debug', '--no-header-files', '--no-man-pages']
+
     launcher {
         name = 'RS232 remote'
+    }
+}
+
+tasks.jpackage.doLast {
+    copy {
+        from project.projectDir
+        include "config.properties"
+        into "$buildDir/jpackage/${jlink.launcherData.get().name}"
     }
 }
 
