@@ -2,15 +2,11 @@
 
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.foxprod.rs232_remote.MainViewController">
    <children>
-      <MenuBar prefHeight="46.0" prefWidth="600.0">
-        <menus>
-          <Menu fx:id="portMenu" mnemonicParsing="false" text="Port" />
-        </menus>
-      </MenuBar>
       <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
          <children>
             <ComboBox fx:id="portsDropdown" prefWidth="150.0" />
@@ -21,7 +17,7 @@
             </Button>
          </children>
       </HBox>
-      <HBox alignment="CENTER" prefHeight="150.0" prefWidth="600.0">
+      <HBox alignment="CENTER" prefHeight="91.0" prefWidth="600.0">
          <children>
             <CheckBox mnemonicParsing="false" text="Optional">
                <HBox.margin>
@@ -44,32 +40,63 @@
                </HBox.margin>
             </Button>
          </children></HBox>
-      <HBox alignment="CENTER" prefHeight="150.0" prefWidth="600.0">
+      <HBox alignment="CENTER" prefHeight="122.0" prefWidth="600.0">
          <children>
-          <Button fx:id="ejectBtn" mnemonicParsing="false" onAction="#onEjectPressed" text="EJECT">
+          <Button fx:id="ejectBtn" maxHeight="60.0" maxWidth="60.0" minHeight="60.0" minWidth="60.0" mnemonicParsing="false" onAction="#onEjectPressed" style="-fx-border-color: black; -fx-background-color: #456691;">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
+               <graphic>
+                  <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" />
+               </graphic>
             </Button>
-            <Button fx:id="rewBtn" mnemonicParsing="false" onAction="#onRewPressed" text="REW">
+            <Button fx:id="rewBtn" maxHeight="60.0" maxWidth="60.0" minHeight="60.0" minWidth="60.0" mnemonicParsing="false" onAction="#onRewPressed" style="-fx-border-color: black; -fx-background-color: white; -fx-border-radius: 5px;">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
+               <graphic>
+                  <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@rew.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
             </Button>
-            <Button fx:id="playBtn" mnemonicParsing="false" onAction="#onPlayPressed" text="PLAY">
+            <Button fx:id="playBtn" maxHeight="60.0" maxWidth="60.0" minHeight="60.0" minWidth="60.0" mnemonicParsing="false" onAction="#onPlayPressed" prefHeight="0.0" prefWidth="0.0" style="-fx-border-color: black; -fx-background-color: white; -fx-border-radius: 5px;">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
+               <graphic>
+                  <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@play.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
             </Button>
-            <Button fx:id="ffBtn" mnemonicParsing="false" onAction="#onFFPressed" text="FF">
+            <Button fx:id="ffBtn" maxHeight="60.0" maxWidth="60.0" minHeight="60.0" minWidth="60.0" mnemonicParsing="false" onAction="#onFFPressed" style="-fx-border-color: black; -fx-background-color: white; -fx-border-radius: 5px;">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
+               <graphic>
+                  <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                  <image>
+                     <Image url="@ff.png" />
+                  </image>
+               </ImageView>
+               </graphic>
             </Button>
-            <Button fx:id="stopBtn" mnemonicParsing="false" onAction="#onStopPressed" text="STOP">
+            <Button fx:id="stopBtn" maxHeight="60.0" maxWidth="60.0" minHeight="60.0" minWidth="60.0" mnemonicParsing="false" onAction="#onStopPressed" style="-fx-border-color: black; -fx-background-color: #456691;">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
+               <graphic>
+                  <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                  <image>
+                     <Image url="@stop.png" />
+                  </image>
+               </ImageView>
+               </graphic>
             </Button>
          </children></HBox>
    </children>

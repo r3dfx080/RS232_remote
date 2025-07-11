@@ -9,9 +9,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="85841248-5528-40c6-97e8-40cf812940b4" name="Changes" comment="Implement some buttons' actions, add proper port closing on exit">
+    <list default="true" id="85841248-5528-40c6-97e8-40cf812940b4" name="Changes" comment="Implement copying config file for jpackage, add separate open/close port button">
+      <change afterPath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/ff.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/rew.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/stop.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/MainView.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/MainView.fxml" afterDir="false" />
     </list>
@@ -84,37 +86,49 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Downloaded.Files.Path.Enabled&quot;: &quot;false&quot;,
-    &quot;Gradle.Build RS232_remote.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.RS232_remote [:org.foxprod.rs232_remote.Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.RS232_remote [clean].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.RS232_remote [dependencies].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.RS232_remote [jar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.RS232_remote [jlink].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.RS232_remote [jpackage].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.RS232_remote [run].executor&quot;: &quot;Run&quot;,
-    &quot;JAR Application.RS232_remote-0.2.jar.executor&quot;: &quot;Run&quot;,
-    &quot;Repository.Attach.Annotations&quot;: &quot;false&quot;,
-    &quot;Repository.Attach.JavaDocs&quot;: &quot;true&quot;,
-    &quot;Repository.Attach.Sources&quot;: &quot;false&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;deletionFromPopupRequiresConfirmation&quot;: &quot;false&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.45814168&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Downloaded.Files.Path.Enabled": "false",
+    "Gradle.Build RS232_remote.executor": "Run",
+    "Gradle.Download Sources.executor": "Run",
+    "Gradle.RS232_remote [:org.foxprod.rs232_remote.Main.main()].executor": "Run",
+    "Gradle.RS232_remote [clean].executor": "Run",
+    "Gradle.RS232_remote [dependencies].executor": "Run",
+    "Gradle.RS232_remote [jar].executor": "Run",
+    "Gradle.RS232_remote [jlink].executor": "Run",
+    "Gradle.RS232_remote [jpackage].executor": "Run",
+    "Gradle.RS232_remote [run].executor": "Run",
+    "JAR Application.RS232_remote-0.2.jar.executor": "Run",
+    "Repository.Attach.Annotations": "false",
+    "Repository.Attach.JavaDocs": "true",
+    "Repository.Attach.Sources": "false",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "deletionFromPopupRequiresConfirmation": "false",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "H:/Arkady/rs232_remote/RS232_remote/src/main/resources/org/foxprod/rs232_remote",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.45814168",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
-  <component name="RunManager" selected="Gradle.RS232_remote [jpackage]">
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="H:\Arkady\rs232_remote\RS232_remote\src\main\resources\org\foxprod\rs232_remote" />
+      <recent name="H:\Arkady\rs232_remote\RS232_remote" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="H:\Arkady\rs232_remote\RS232_remote\src\main\resources\org\foxprod\rs232_remote" />
+      <recent name="H:\Arkady\rs232_remote\RS232_remote\src\main\resources" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Gradle.RS232_remote [run]">
     <configuration name="RS232_remote [clean]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -127,29 +141,6 @@
         <option name="taskNames">
           <list>
             <option value="clean" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <EXTENSION ID="com.haulmont.jmixstudio.buildsystem.gradle.runconfiguration.JmixGradleRunConfigurationExtension" isNew="true" />
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
-      <method v="2" />
-    </configuration>
-    <configuration name="RS232_remote [jar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="jar" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -207,17 +198,40 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
+    <configuration name="RS232_remote [run]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="run" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <EXTENSION ID="com.haulmont.jmixstudio.buildsystem.gradle.runconfiguration.JmixGradleRunConfigurationExtension" isNew="true" />
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
     <configuration name="RS232_remote-0.2.jar" type="JarApplication" temporary="true">
       <option name="JAR_PATH" value="$PROJECT_DIR$/build/libs/RS232_remote-0.2.jar" />
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.RS232_remote [run]" />
         <item itemvalue="Gradle.RS232_remote [jpackage]" />
         <item itemvalue="Gradle.RS232_remote [clean]" />
         <item itemvalue="Gradle.RS232_remote [jlink]" />
         <item itemvalue="JAR Application.RS232_remote-0.2.jar" />
-        <item itemvalue="Gradle.RS232_remote [jar]" />
       </list>
     </recent_temporary>
   </component>
@@ -241,7 +255,8 @@
       <workItem from="1751576986040" duration="2060000" />
       <workItem from="1751579067244" duration="13219000" />
       <workItem from="1751633261121" duration="3241000" />
-      <workItem from="1751744574099" duration="1431000" />
+      <workItem from="1751744574099" duration="22147000" />
+      <workItem from="1752263615936" duration="1593000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
@@ -275,7 +290,15 @@
       <option name="project" value="LOCAL" />
       <updated>1751631192004</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Implement copying config file for jpackage, add separate open/close port button">
+      <option name="closed" value="true" />
+      <created>1751751947388</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1751751947388</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -297,6 +320,18 @@
     <MESSAGE value="Start filling form, add icon and necessary libraries" />
     <MESSAGE value="Implement loading properties, fill basic form layout" />
     <MESSAGE value="Implement some buttons' actions, add proper port closing on exit" />
-    <option name="LAST_COMMIT_MESSAGE" value="Implement some buttons' actions, add proper port closing on exit" />
+    <MESSAGE value="Implement copying config file for jpackage, add separate open/close port button" />
+    <option name="LAST_COMMIT_MESSAGE" value="Implement copying config file for jpackage, add separate open/close port button" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java</url>
+          <line>103</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
