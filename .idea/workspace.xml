@@ -9,11 +9,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="85841248-5528-40c6-97e8-40cf812940b4" name="Changes" comment="Implement copying config file for jpackage, add separate open/close port button">
-      <change afterPath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/ff.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/rew.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/stop.png" afterDir="false" />
+    <list default="true" id="85841248-5528-40c6-97e8-40cf812940b4" name="Changes" comment="Implement port opening on a button press, add button icons">
+      <change afterPath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/eject.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config.properties" beforeDir="false" afterPath="$PROJECT_DIR$/config.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/icon.png" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/MainView.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/MainView.fxml" afterDir="false" />
     </list>
@@ -128,7 +129,7 @@
       <recent name="H:\Arkady\rs232_remote\RS232_remote\src\main\resources" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.RS232_remote [run]">
+  <component name="RunManager" selected="Gradle.RS232_remote [jpackage]">
     <configuration name="RS232_remote [clean]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -227,9 +228,9 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.RS232_remote [run]" />
         <item itemvalue="Gradle.RS232_remote [jpackage]" />
         <item itemvalue="Gradle.RS232_remote [clean]" />
+        <item itemvalue="Gradle.RS232_remote [run]" />
         <item itemvalue="Gradle.RS232_remote [jlink]" />
         <item itemvalue="JAR Application.RS232_remote-0.2.jar" />
       </list>
@@ -256,7 +257,7 @@
       <workItem from="1751579067244" duration="13219000" />
       <workItem from="1751633261121" duration="3241000" />
       <workItem from="1751744574099" duration="22147000" />
-      <workItem from="1752263615936" duration="1593000" />
+      <workItem from="1752263615936" duration="5580000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
@@ -298,7 +299,15 @@
       <option name="project" value="LOCAL" />
       <updated>1751751947388</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Implement port opening on a button press, add button icons">
+      <option name="closed" value="true" />
+      <created>1752265254993</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1752265254993</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -321,17 +330,7 @@
     <MESSAGE value="Implement loading properties, fill basic form layout" />
     <MESSAGE value="Implement some buttons' actions, add proper port closing on exit" />
     <MESSAGE value="Implement copying config file for jpackage, add separate open/close port button" />
-    <option name="LAST_COMMIT_MESSAGE" value="Implement copying config file for jpackage, add separate open/close port button" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java</url>
-          <line>103</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="Implement port opening on a button press, add button icons" />
+    <option name="LAST_COMMIT_MESSAGE" value="Implement port opening on a button press, add button icons" />
   </component>
 </project>

@@ -4,6 +4,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import com.fazecast.jSerialComm.SerialPort;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 
@@ -37,12 +38,17 @@ public class MainViewController implements Initializable {
 
         SerialPort[] ports = SerialPort.getCommPorts();
 
-        for (SerialPort port : ports) {
-            portsDropdown.getItems().add(port.getSystemPortPath().substring(4));
+        if (ports.length == 0) {
+            setAlertWithParameters(Alert.AlertType.WARNING, "No COM ports detected!");
         }
-        portsDropdown.setValue(portsDropdown.getItems().getLast());
+        else {
+            for (SerialPort port : ports) {
+                portsDropdown.getItems().add(port.getSystemPortPath().substring(4));
+            }
+            portsDropdown.setValue(portsDropdown.getItems().getLast());
 
-        loadCodes();
+            loadCodes();
+        }
     }
 
     // Loading codes from config inti HashMap
@@ -53,6 +59,7 @@ public class MainViewController implements Initializable {
                 codes.put(key, properties.getProperty(key));
             }
         } catch (Exception e) {
+            setAlertWithParameters(Alert.AlertType.ERROR, "Error: could not load config file");
             throw new RuntimeException(e);
         }
     }
@@ -63,6 +70,7 @@ public class MainViewController implements Initializable {
             portOutputStream.write(new byte[] { (byte) Integer.parseInt(command, 16) });
             System.out.println("Sent " + Arrays.toString(new byte[]{(byte) Integer.parseInt(command, 16)}));
         } catch (IOException e) {
+            setAlertWithParameters(Alert.AlertType.ERROR, "Error sending command: " + command);
             throw new RuntimeException(e);
         }
     }
@@ -108,19 +116,26 @@ public class MainViewController implements Initializable {
             activePort = SerialPort.getCommPort(portsDropdown.getValue());
 
             portOutputStream = openPort(activePort);
-
-            isPortOpened = true;
-            openPortButton.setText("Close");
+            if (portOutputStream != null) {
+                isPortOpened = true;
+                openPortButton.setText("Close");
+            }
+            else {
+                setAlertWithParameters(Alert.AlertType.ERROR, "Error: could not open port");
+            }
         }
     }
 
     public OutputStream openPort(SerialPort serialPort) {
         if (serialPort != null) {
-        serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 0, 0);
+            serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 0, 0);
 
-        serialPort.openPort();
+            serialPort.openPort();
 
-        return serialPort.getOutputStream();
+            return serialPort.getOutputStream();
+        }
+        else {
+            setAlertWithParameters(Alert.AlertType.ERROR, "Error: serial port is null");
         }
         return null;
     }
@@ -130,11 +145,19 @@ public class MainViewController implements Initializable {
             try {
                 outputStream.close();
             } catch (IOException e) {
+                setAlertWithParameters(Alert.AlertType.ERROR, "Error closing port");
                 throw new RuntimeException(e);
             }
+            portOutputStream = null;
             serialPort.clearDTR();
             serialPort.clearRTS();
             serialPort.closePort();
         }
+    }
+
+    void setAlertWithParameters(Alert.AlertType alertType, String text){
+        Alert alert = new Alert(alertType);
+        alert.setContentText(text);
+        alert.showAndWait();
     }
 }

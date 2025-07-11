@@ -7,7 +7,7 @@ plugins {
 }
 
 group 'org.foxprod'
-version '0.2'
+version '0.3'
 
 repositories {
     mavenCentral()
@@ -50,6 +50,11 @@ test {
 }
 
 jlink {
+    jpackage {
+        icon = "$rootDir/src/main/resources/org/foxprod/rs232_remote/icon.ico"
+        appVersion = getAppVersion();
+        installerType = "exe"
+    }
     imageZip = project.file("${buildDir}/distributions/app-${javafx.platform.classifier}.zip")
     targetPlatform("win") {
     }
