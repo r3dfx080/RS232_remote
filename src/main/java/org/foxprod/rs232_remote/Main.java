@@ -16,13 +16,13 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("MainView.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 640, 240);
+        Scene scene = new Scene(fxmlLoader.load());
 
         controller = fxmlLoader.getController();
 
-        stage.setResizable(false);
+        //stage.setResizable(false);
         stage.setTitle("RS-232 remote");
-        stage.getIcons().add(new Image("file:icon.png"));
+        stage.getIcons().add(new Image("file:src/main/resources/org/foxprod/rs232_remote/icon.png"));
         stage.setScene(scene);
         stage.show();
     }

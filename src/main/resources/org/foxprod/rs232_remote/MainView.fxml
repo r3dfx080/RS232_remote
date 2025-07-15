@@ -4,45 +4,86 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.foxprod.rs232_remote.MainViewController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="481.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.foxprod.rs232_remote.MainViewController">
    <children>
-      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+      <HBox alignment="CENTER" prefHeight="14.0" prefWidth="605.0">
          <children>
-            <ComboBox fx:id="portsDropdown" prefWidth="150.0" />
-            <Button fx:id="openPortButton" mnemonicParsing="false" onAction="#onOpenPortPressed" text="Open">
+            <ComboBox fx:id="portsDropdown" maxHeight="10.0" minHeight="30.0" prefWidth="150.0" style="-fx-border-radius: 0px; -fx-background-radius: 0px;">
                <HBox.margin>
-                  <Insets left="5.0" />
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </HBox.margin></ComboBox>
+            <Button fx:id="openPortButton" maxHeight="10.0" maxWidth="60.0" minHeight="30.0" minWidth="60.0" mnemonicParsing="false" onAction="#onOpenPortPressed" style="-fx-border-radius: 0px; -fx-background-radius: 0px;" text="Open">
+               <HBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
+               <font>
+                  <Font size="14.0" />
+               </font>
             </Button>
          </children>
+         <VBox.margin>
+            <Insets bottom="5.0" top="10.0" />
+         </VBox.margin>
       </HBox>
-      <HBox alignment="CENTER" prefHeight="91.0" prefWidth="600.0">
+      <HBox alignment="CENTER" prefHeight="24.0" prefWidth="605.0">
          <children>
-            <CheckBox mnemonicParsing="false" text="Optional">
+            <CheckBox fx:id="optional1" mnemonicParsing="false" onAction="#onOptionalClicked" text="Optional">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
+               <font>
+                  <Font size="14.0" />
+               </font>
             </CheckBox>
-            <Button mnemonicParsing="false" text="Button">
+            <Button fx:id="button1" mnemonicParsing="false" onAction="#onButton1Pressed" style="-fx-border-radius: 0px; -fx-background-radius: 0px;" stylesheets="@styles.css" text="Button">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
+               <font>
+                  <Font size="14.0" />
+               </font>
             </Button>
-            <Button mnemonicParsing="false" text="Button">
+            <Button fx:id="button2" mnemonicParsing="false" onAction="#onButton2Pressed" style="-fx-border-radius: 0px; -fx-background-radius: 0px;" stylesheets="@styles.css" text="Button">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
+               <font>
+                  <Font size="14.0" />
+               </font>
             </Button>
-            <Button mnemonicParsing="false" text="Button">
+            <Button fx:id="button3" mnemonicParsing="false" onAction="#onButton3Pressed" style="-fx-border-radius: 0px; -fx-background-radius: 0px;" stylesheets="@styles.css" text="Button">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
+               <font>
+                  <Font size="14.0" />
+               </font>
             </Button>
-         </children></HBox>
-      <HBox alignment="CENTER" prefHeight="122.0" prefWidth="600.0">
+            <Button fx:id="button4" mnemonicParsing="false" onAction="#onButton4Pressed" style="-fx-border-radius: 0px; -fx-background-radius: 0px;" stylesheets="@styles.css" text="Button">
+               <HBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </HBox.margin>
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Button>
+            <Button fx:id="button5" mnemonicParsing="false" onAction="#onButton5Pressed" style="-fx-border-radius: 0px; -fx-background-radius: 0px;" stylesheets="@styles.css" text="Button">
+               <HBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </HBox.margin>
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Button>
+         </children>
+         <VBox.margin>
+            <Insets bottom="5.0" top="5.0" />
+         </VBox.margin></HBox>
+      <HBox alignment="CENTER" prefHeight="0.0" prefWidth="605.0">
          <children>
-          <Button fx:id="ejectBtn" maxHeight="60.0" maxWidth="60.0" minHeight="60.0" minWidth="60.0" mnemonicParsing="false" onAction="#onEjectPressed" style="-fx-border-color: black; -fx-background-color: #456691; -fx-border-radius: 5px;">
+          <Button fx:id="ejectBtn" maxHeight="60.0" maxWidth="60.0" minHeight="60.0" minWidth="60.0" mnemonicParsing="false" onAction="#onEjectPressed" style="-fx-border-color: black; -fx-background-color: #456691; -fx-border-radius: 5px; -fx-background-radius: 5px;" stylesheets="@styles.css">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
@@ -54,7 +95,7 @@
                   </ImageView>
                </graphic>
             </Button>
-            <Button fx:id="rewBtn" maxHeight="60.0" maxWidth="60.0" minHeight="60.0" minWidth="60.0" mnemonicParsing="false" onAction="#onRewPressed" style="-fx-border-color: black; -fx-background-color: white; -fx-border-radius: 5px;">
+            <Button fx:id="rewBtn" maxHeight="60.0" maxWidth="60.0" minHeight="60.0" minWidth="60.0" mnemonicParsing="false" onAction="#onRewPressed" style="-fx-border-color: black; -fx-background-color: #fafafa; -fx-border-radius: 5px; -fx-background-radius: 5px;" stylesheets="@styles.css">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
@@ -66,7 +107,7 @@
                   </ImageView>
                </graphic>
             </Button>
-            <Button fx:id="playBtn" maxHeight="60.0" maxWidth="60.0" minHeight="60.0" minWidth="60.0" mnemonicParsing="false" onAction="#onPlayPressed" prefHeight="0.0" prefWidth="0.0" style="-fx-border-color: black; -fx-background-color: white; -fx-border-radius: 5px;">
+            <Button fx:id="playBtn" maxHeight="60.0" maxWidth="60.0" minHeight="60.0" minWidth="60.0" mnemonicParsing="false" onAction="#onPlayPressed" prefHeight="0.0" prefWidth="0.0" style="-fx-border-color: black; -fx-background-color: #fafafa; -fx-border-radius: 5px; -fx-background-radius: 5px;" stylesheets="@styles.css">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
@@ -78,7 +119,7 @@
                   </ImageView>
                </graphic>
             </Button>
-            <Button fx:id="ffBtn" maxHeight="60.0" maxWidth="60.0" minHeight="60.0" minWidth="60.0" mnemonicParsing="false" onAction="#onFFPressed" style="-fx-border-color: black; -fx-background-color: white; -fx-border-radius: 5px;">
+            <Button fx:id="ffBtn" maxHeight="60.0" maxWidth="60.0" minHeight="60.0" minWidth="60.0" mnemonicParsing="false" onAction="#onFFPressed" style="-fx-border-color: black; -fx-background-color: #fafafa; -fx-border-radius: 5px; -fx-background-radius: 5px;" stylesheets="@styles.css">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
@@ -90,7 +131,7 @@
                </ImageView>
                </graphic>
             </Button>
-            <Button fx:id="stopBtn" maxHeight="60.0" maxWidth="60.0" minHeight="60.0" minWidth="60.0" mnemonicParsing="false" onAction="#onStopPressed" style="-fx-border-color: black; -fx-background-color: #456691; -fx-border-radius: 5px;">
+            <Button fx:id="stopBtn" maxHeight="60.0" maxWidth="60.0" minHeight="60.0" minWidth="60.0" mnemonicParsing="false" onAction="#onStopPressed" style="-fx-border-color: black; -fx-background-color: #456691; -fx-border-radius: 5px; -fx-background-radius: 5px;" stylesheets="@styles.css">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
@@ -102,6 +143,9 @@
                </ImageView>
                </graphic>
             </Button>
-         </children></HBox>
+         </children>
+         <VBox.margin>
+            <Insets bottom="10.0" top="5.0" />
+         </VBox.margin></HBox>
    </children>
 </VBox>

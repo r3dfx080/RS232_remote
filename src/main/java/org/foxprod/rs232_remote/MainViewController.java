@@ -6,6 +6,7 @@ import com.fazecast.jSerialComm.SerialPort;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 
 import java.io.FileInputStream;
@@ -20,11 +21,29 @@ public class MainViewController implements Initializable {
 
     Properties properties = new Properties();
 
-    Map<String, String> codes = new LinkedHashMap<>();
+    Map<String, String> config = new LinkedHashMap<>();
 
     OutputStream portOutputStream;
 
     Boolean isPortOpened = false;
+
+    @FXML
+    private Button button1;
+
+    @FXML
+    private Button button2;
+
+    @FXML
+    private Button button3;
+
+    @FXML
+    private Button button4;
+
+    @FXML
+    private Button button5;
+
+    @FXML
+    private CheckBox optional1;
 
     @FXML
     private Button openPortButton;
@@ -47,16 +66,29 @@ public class MainViewController implements Initializable {
             }
             portsDropdown.setValue(portsDropdown.getItems().getLast());
 
-            loadCodes();
+            loadConfig();
+
+            // Loading buttons' names from config file
+            button1.setText(config.get("button1_name"));
+            button2.setText(config.get("button2_name"));
+            button3.setText(config.get("button3_name"));
+            button4.setText(config.get("button4_name"));
+            button5.setText(config.get("button5_name"));
+            optional1.setText(config.get("optional1_name"));
+
+            if (config.get("optional1_engaged").equals("true")) {
+                optional1.setSelected(true);
+            }
+
         }
     }
 
-    // Loading codes from config inti HashMap
-    public void loadCodes() {
+    // Loading config into HashMap
+    public void loadConfig() {
         try(FileInputStream fileInputStream = new FileInputStream("config.properties")) {
             properties.load(fileInputStream);
             for (String key : properties.stringPropertyNames()) {
-                codes.put(key, properties.getProperty(key));
+                config.put(key, properties.getProperty(key));
             }
         } catch (Exception e) {
             setAlertWithParameters(Alert.AlertType.ERROR, "Error: could not load config file");
@@ -81,27 +113,27 @@ public class MainViewController implements Initializable {
 
     public void onEjectPressed(ActionEvent actionEvent) {
         if (!isPortOpened) {openPortButton.fire();}
-        sendCommand(codes.get("eject"));
+        sendCommand(config.get("eject"));
     }
 
     public void onRewPressed(ActionEvent actionEvent) {
         if (!isPortOpened) {openPortButton.fire();}
-        sendCommand(codes.get("rew"));
+        sendCommand(config.get("rew"));
     }
 
     public void onPlayPressed(ActionEvent actionEvent) {
         if (!isPortOpened) {openPortButton.fire();}
-        sendCommand(codes.get("play"));
+        sendCommand(config.get("play"));
     }
 
     public void onFFPressed(ActionEvent actionEvent) {
         if (!isPortOpened) {openPortButton.fire();}
-        sendCommand(codes.get("ff"));
+        sendCommand(config.get("ff"));
     }
 
     public void onStopPressed(ActionEvent actionEvent) {
         if (!isPortOpened) {openPortButton.fire();}
-        sendCommand(codes.get("stop"));
+        sendCommand(config.get("stop"));
     }
 
     // Opening port if not open yet and changing button text accordingly
@@ -155,9 +187,46 @@ public class MainViewController implements Initializable {
         }
     }
 
+    // Setting up a custom Alert
     void setAlertWithParameters(Alert.AlertType alertType, String text){
         Alert alert = new Alert(alertType);
         alert.setContentText(text);
         alert.showAndWait();
+    }
+
+    // Optional checkbox enables RTS
+    public void onOptionalClicked(ActionEvent actionEvent) {
+        if (!isPortOpened) {openPortButton.fire();}
+        if (optional1.isSelected()){
+            activePort.setRTS();
+        }
+        else {
+            activePort.clearRTS();
+        }
+    }
+
+    public void onButton1Pressed(ActionEvent actionEvent) {
+        if (!isPortOpened) {openPortButton.fire();}
+        sendCommand(config.get("button1_cmd"));
+    }
+
+    public void onButton2Pressed(ActionEvent actionEvent) {
+        if (!isPortOpened) {openPortButton.fire();}
+        sendCommand(config.get("button2_cmd"));
+    }
+
+    public void onButton3Pressed(ActionEvent actionEvent) {
+        if (!isPortOpened) {openPortButton.fire();}
+        sendCommand(config.get("button3_cmd"));
+    }
+
+    public void onButton4Pressed(ActionEvent actionEvent) {
+        if (!isPortOpened) {openPortButton.fire();}
+        sendCommand(config.get("button4_cmd"));
+    }
+
+    public void onButton5Pressed(ActionEvent actionEvent) {
+        if (!isPortOpened) {openPortButton.fire();}
+        sendCommand(config.get("button5_cmd"));
     }
 }

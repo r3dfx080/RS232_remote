@@ -9,12 +9,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="85841248-5528-40c6-97e8-40cf812940b4" name="Changes" comment="Implement port opening on a button press, add button icons">
-      <change afterPath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/eject.png" afterDir="false" />
+    <list default="true" id="85841248-5528-40c6-97e8-40cf812940b4" name="Changes" comment="Implement custom alerts, add application icon">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config.properties" beforeDir="false" afterPath="$PROJECT_DIR$/config.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/icon.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/MainView.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/MainView.fxml" afterDir="false" />
     </list>
@@ -87,38 +86,38 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Downloaded.Files.Path.Enabled": "false",
-    "Gradle.Build RS232_remote.executor": "Run",
-    "Gradle.Download Sources.executor": "Run",
-    "Gradle.RS232_remote [:org.foxprod.rs232_remote.Main.main()].executor": "Run",
-    "Gradle.RS232_remote [clean].executor": "Run",
-    "Gradle.RS232_remote [dependencies].executor": "Run",
-    "Gradle.RS232_remote [jar].executor": "Run",
-    "Gradle.RS232_remote [jlink].executor": "Run",
-    "Gradle.RS232_remote [jpackage].executor": "Run",
-    "Gradle.RS232_remote [run].executor": "Run",
-    "JAR Application.RS232_remote-0.2.jar.executor": "Run",
-    "Repository.Attach.Annotations": "false",
-    "Repository.Attach.JavaDocs": "true",
-    "Repository.Attach.Sources": "false",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "deletionFromPopupRequiresConfirmation": "false",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "H:/Arkady/rs232_remote/RS232_remote/src/main/resources/org/foxprod/rs232_remote",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.45814168",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Downloaded.Files.Path.Enabled&quot;: &quot;false&quot;,
+    &quot;Gradle.Build RS232_remote.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.RS232_remote [:org.foxprod.rs232_remote.Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.RS232_remote [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.RS232_remote [dependencies].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.RS232_remote [jar].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.RS232_remote [jlink].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.RS232_remote [jpackage].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.RS232_remote [run].executor&quot;: &quot;Run&quot;,
+    &quot;JAR Application.RS232_remote-0.2.jar.executor&quot;: &quot;Run&quot;,
+    &quot;Repository.Attach.Annotations&quot;: &quot;false&quot;,
+    &quot;Repository.Attach.JavaDocs&quot;: &quot;true&quot;,
+    &quot;Repository.Attach.Sources&quot;: &quot;false&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;deletionFromPopupRequiresConfirmation&quot;: &quot;false&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;H:/Arkady/rs232_remote/RS232_remote/src/main/resources/org/foxprod/rs232_remote&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.45814168&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="H:\Arkady\rs232_remote\RS232_remote\src\main\resources\org\foxprod\rs232_remote" />
@@ -129,7 +128,7 @@
       <recent name="H:\Arkady\rs232_remote\RS232_remote\src\main\resources" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.RS232_remote [jpackage]">
+  <component name="RunManager" selected="Gradle.RS232_remote [run]">
     <configuration name="RS232_remote [clean]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -228,9 +227,9 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.RS232_remote [run]" />
         <item itemvalue="Gradle.RS232_remote [jpackage]" />
         <item itemvalue="Gradle.RS232_remote [clean]" />
-        <item itemvalue="Gradle.RS232_remote [run]" />
         <item itemvalue="Gradle.RS232_remote [jlink]" />
         <item itemvalue="JAR Application.RS232_remote-0.2.jar" />
       </list>
@@ -257,7 +256,9 @@
       <workItem from="1751579067244" duration="13219000" />
       <workItem from="1751633261121" duration="3241000" />
       <workItem from="1751744574099" duration="22147000" />
-      <workItem from="1752263615936" duration="5580000" />
+      <workItem from="1752263615936" duration="6388000" />
+      <workItem from="1752418730660" duration="2645000" />
+      <workItem from="1752567349439" duration="4454000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
@@ -307,7 +308,15 @@
       <option name="project" value="LOCAL" />
       <updated>1752265254993</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Implement custom alerts, add application icon">
+      <option name="closed" value="true" />
+      <created>1752273981347</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1752273981347</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -331,6 +340,7 @@
     <MESSAGE value="Implement some buttons' actions, add proper port closing on exit" />
     <MESSAGE value="Implement copying config file for jpackage, add separate open/close port button" />
     <MESSAGE value="Implement port opening on a button press, add button icons" />
-    <option name="LAST_COMMIT_MESSAGE" value="Implement port opening on a button press, add button icons" />
+    <MESSAGE value="Implement custom alerts, add application icon" />
+    <option name="LAST_COMMIT_MESSAGE" value="Implement custom alerts, add application icon" />
   </component>
 </project>
