@@ -20,7 +20,7 @@ public class Main extends Application {
 
         controller = fxmlLoader.getController();
 
-        //stage.setResizable(false);
+        stage.setResizable(false);
         stage.setTitle("RS-232 remote");
         stage.getIcons().add(new Image("file:src/main/resources/org/foxprod/rs232_remote/icon.png"));
         stage.setScene(scene);

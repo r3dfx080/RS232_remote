@@ -37,7 +37,7 @@
                   <Font size="14.0" />
                </font>
             </CheckBox>
-            <Button fx:id="button1" mnemonicParsing="false" onAction="#onButton1Pressed" style="-fx-border-radius: 0px; -fx-background-radius: 0px;" stylesheets="@styles.css" text="Button">
+            <Button fx:id="button1" mnemonicParsing="false" onAction="#onButton1Pressed" style="-fx-border-radius: 0px; -fx-background-radius: 0px;" stylesheets="@styles.css" text="Button1">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
@@ -45,7 +45,7 @@
                   <Font size="14.0" />
                </font>
             </Button>
-            <Button fx:id="button2" mnemonicParsing="false" onAction="#onButton2Pressed" style="-fx-border-radius: 0px; -fx-background-radius: 0px;" stylesheets="@styles.css" text="Button">
+            <Button fx:id="button2" mnemonicParsing="false" onAction="#onButton2Pressed" style="-fx-border-radius: 0px; -fx-background-radius: 0px;" stylesheets="@styles.css" text="Button2">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
@@ -53,7 +53,7 @@
                   <Font size="14.0" />
                </font>
             </Button>
-            <Button fx:id="button3" mnemonicParsing="false" onAction="#onButton3Pressed" style="-fx-border-radius: 0px; -fx-background-radius: 0px;" stylesheets="@styles.css" text="Button">
+            <Button fx:id="button3" mnemonicParsing="false" onAction="#onButton3Pressed" style="-fx-border-radius: 0px; -fx-background-radius: 0px;" stylesheets="@styles.css" text="Button3">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
@@ -61,7 +61,7 @@
                   <Font size="14.0" />
                </font>
             </Button>
-            <Button fx:id="button4" mnemonicParsing="false" onAction="#onButton4Pressed" style="-fx-border-radius: 0px; -fx-background-radius: 0px;" stylesheets="@styles.css" text="Button">
+            <Button fx:id="button4" mnemonicParsing="false" onAction="#onButton4Pressed" style="-fx-border-radius: 0px; -fx-background-radius: 0px;" stylesheets="@styles.css" text="Button4">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
@@ -69,7 +69,7 @@
                   <Font size="14.0" />
                </font>
             </Button>
-            <Button fx:id="button5" mnemonicParsing="false" onAction="#onButton5Pressed" style="-fx-border-radius: 0px; -fx-background-radius: 0px;" stylesheets="@styles.css" text="Button">
+            <Button fx:id="button5" mnemonicParsing="false" onAction="#onButton5Pressed" style="-fx-border-radius: 0px; -fx-background-radius: 0px;" stylesheets="@styles.css" text="Button5">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
@@ -89,9 +89,7 @@
                </HBox.margin>
                <graphic>
                   <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@eject.png" />
-                     </image>
+                     <Image url="@eject.png" />
                   </ImageView>
                </graphic>
             </Button>
@@ -101,9 +99,7 @@
                </HBox.margin>
                <graphic>
                   <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@rew.png" />
-                     </image>
+                     <Image url="@rew.png" />
                   </ImageView>
                </graphic>
             </Button>
@@ -113,9 +109,7 @@
                </HBox.margin>
                <graphic>
                   <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@play.png" />
-                     </image>
+                     <Image url="@play.png" />
                   </ImageView>
                </graphic>
             </Button>
@@ -125,10 +119,8 @@
                </HBox.margin>
                <graphic>
                   <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                  <image>
                      <Image url="@ff.png" />
-                  </image>
-               </ImageView>
+                  </ImageView>
                </graphic>
             </Button>
             <Button fx:id="stopBtn" maxHeight="60.0" maxWidth="60.0" minHeight="60.0" minWidth="60.0" mnemonicParsing="false" onAction="#onStopPressed" style="-fx-border-color: black; -fx-background-color: #456691; -fx-border-radius: 5px; -fx-background-radius: 5px;" stylesheets="@styles.css">
@@ -137,10 +129,8 @@
                </HBox.margin>
                <graphic>
                   <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                  <image>
                      <Image url="@stop.png" />
-                  </image>
-               </ImageView>
+                  </ImageView>
                </graphic>
             </Button>
          </children>

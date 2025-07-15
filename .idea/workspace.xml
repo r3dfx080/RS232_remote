@@ -9,10 +9,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="85841248-5528-40c6-97e8-40cf812940b4" name="Changes" comment="Implement custom alerts, add application icon">
+    <list default="true" id="85841248-5528-40c6-97e8-40cf812940b4" name="Changes" comment="Fix optional1 not firing when engaged inf config by default">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config.properties" beforeDir="false" afterPath="$PROJECT_DIR$/config.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/MainView.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/MainView.fxml" afterDir="false" />
@@ -75,7 +73,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="CurrentFile" />
+    <option name="selectedTabId" value="ProjectErrors" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 7
@@ -258,7 +256,7 @@
       <workItem from="1751744574099" duration="22147000" />
       <workItem from="1752263615936" duration="6388000" />
       <workItem from="1752418730660" duration="2645000" />
-      <workItem from="1752567349439" duration="4454000" />
+      <workItem from="1752567349439" duration="6452000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
@@ -316,7 +314,23 @@
       <option name="project" value="LOCAL" />
       <updated>1752273981347</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Implement custom buttons' names via config, set up name independent command sending for 5 user buttons">
+      <option name="closed" value="true" />
+      <created>1752583961374</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1752583961374</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Fix optional1 not firing when engaged inf config by default">
+      <option name="closed" value="true" />
+      <created>1752584515047</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1752584515047</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -341,6 +355,8 @@
     <MESSAGE value="Implement copying config file for jpackage, add separate open/close port button" />
     <MESSAGE value="Implement port opening on a button press, add button icons" />
     <MESSAGE value="Implement custom alerts, add application icon" />
-    <option name="LAST_COMMIT_MESSAGE" value="Implement custom alerts, add application icon" />
+    <MESSAGE value="Implement custom buttons' names via config, set up name independent command sending for 5 user buttons" />
+    <MESSAGE value="Fix optional1 not firing when engaged inf config by default" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix optional1 not firing when engaged inf config by default" />
   </component>
 </project>

@@ -77,7 +77,7 @@ public class MainViewController implements Initializable {
             optional1.setText(config.get("optional1_name"));
 
             if (config.get("optional1_engaged").equals("true")) {
-                optional1.setSelected(true);
+                optional1.fire();
             }
 
         }
