@@ -1,16 +1,23 @@
 package org.foxprod.rs232_remote;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import com.fazecast.jSerialComm.SerialPort;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.input.ScrollEvent;
+import javafx.util.Duration;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 public class MainViewController implements Initializable {
@@ -23,7 +30,13 @@ public class MainViewController implements Initializable {
 
     OutputStream portOutputStream;
 
-    Boolean isPortOpened = false;
+    Boolean isPortOpened = false,
+            isTimerEngaged = false;
+
+    ObjectProperty<java.time.Duration> remainingDuration;
+
+    @FXML
+    private Label timerLabel;
 
     @FXML
     private Button timerStartButton;
@@ -237,6 +250,35 @@ public class MainViewController implements Initializable {
     }
 
     public void onTimerStartButtonPressed(ActionEvent actionEvent) {
+        if (isTimerEngaged) {
+            isTimerEngaged = false;
+            timerStartButton.setText("Start timer");
+        }
+        else {
+            remainingDuration = new SimpleObjectProperty<>(java.time.Duration.ofSeconds(timerSpinner.getValue()));
+            timerLabel.textProperty().bind(Bindings.createStringBinding(() ->
+                            String.format("%02d:%02d:%02d",
+                            remainingDuration.get().toHours(),
+                            remainingDuration.get().toMinutesPart(),
+                            remainingDuration.get().toSecondsPart()),
+                    remainingDuration));
+
+            Timeline timerTimeline = new Timeline();
+            timerTimeline.getKeyFrames().add(new KeyFrame(Duration.seconds(1), event -> {
+                remainingDuration.setValue(remainingDuration.get().minus(1, ChronoUnit.SECONDS));
+                if ((remainingDuration.get() == java.time.Duration.ofSeconds(0)) || (remainingDuration.get() == java.time.Duration.ZERO)) {
+                    timerTimeline.stop();
+                    timerLabel.textProperty().unbind();
+                    timerLabel.setText("time is over!");
+                }
+            }));
+
+            timerTimeline.setCycleCount(Timeline.INDEFINITE);
+            timerTimeline.play();
+
+            isTimerEngaged = true;
+            timerStartButton.setText("Stop timer");
+        }
     }
 
     public void onTimerValueScrolled(ScrollEvent scrollEvent) {

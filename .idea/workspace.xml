@@ -9,10 +9,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="85841248-5528-40c6-97e8-40cf812940b4" name="Changes" comment="Fix optional1 not firing when engaged inf config by default">
+    <list default="true" id="85841248-5528-40c6-97e8-40cf812940b4" name="Changes" comment="Add scrollable timer spinner, timer button and timer label">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/MainView.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/MainView.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -258,7 +257,7 @@
       <workItem from="1752567349439" duration="12136000" />
       <workItem from="1752960836848" duration="598000" />
       <workItem from="1753083653363" duration="599000" />
-      <workItem from="1754295267880" duration="2737000" />
+      <workItem from="1754295267880" duration="6918000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
@@ -340,7 +339,15 @@
       <option name="project" value="LOCAL" />
       <updated>1752594006131</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Add scrollable timer spinner, timer button and timer label">
+      <option name="closed" value="true" />
+      <created>1754336271095</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1754336271095</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -367,6 +374,7 @@
     <MESSAGE value="Implement custom alerts, add application icon" />
     <MESSAGE value="Implement custom buttons' names via config, set up name independent command sending for 5 user buttons" />
     <MESSAGE value="Fix optional1 not firing when engaged inf config by default" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fix optional1 not firing when engaged inf config by default" />
+    <MESSAGE value="Add scrollable timer spinner, timer button and timer label" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add scrollable timer spinner, timer button and timer label" />
   </component>
 </project>
