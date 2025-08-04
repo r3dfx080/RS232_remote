@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="481.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.foxprod.rs232_remote.MainViewController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="245.0" prefWidth="481.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.foxprod.rs232_remote.MainViewController">
    <children>
       <HBox alignment="CENTER" prefHeight="14.0" prefWidth="605.0">
          <children>
@@ -26,6 +26,31 @@
          <VBox.margin>
             <Insets bottom="5.0" top="10.0" />
          </VBox.margin>
+      </HBox>
+      <HBox alignment="CENTER" prefHeight="56.0" prefWidth="481.0">
+         <children>
+            <Button fx:id="timerStartButton" minHeight="30.0" mnemonicParsing="false" onAction="#onTimerStartButtonPressed" style="-fx-border-radius: 0px; -fx-background-radius: 0px;" text="Start timer">
+               <HBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </HBox.margin>
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Button>
+            <Spinner fx:id="timerSpinner" editable="true" minHeight="30.0" onScroll="#onTimerValueScrolled" prefHeight="25.0" prefWidth="70.0" style="-fx-border-radius: 0px; -fx-background-radius: 0px;">
+               <HBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </HBox.margin>
+            </Spinner>
+            <Label fx:id="timerLabel">
+               <HBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </HBox.margin>
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Label>
+         </children>
       </HBox>
       <HBox alignment="CENTER" prefHeight="24.0" prefWidth="605.0">
          <children>

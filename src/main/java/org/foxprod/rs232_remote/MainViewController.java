@@ -4,10 +4,8 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import com.fazecast.jSerialComm.SerialPort;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.*;
+import javafx.scene.input.ScrollEvent;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -26,6 +24,12 @@ public class MainViewController implements Initializable {
     OutputStream portOutputStream;
 
     Boolean isPortOpened = false;
+
+    @FXML
+    private Button timerStartButton;
+
+    @FXML
+    private Spinner<Integer> timerSpinner;
 
     @FXML
     private Button button1;
@@ -79,8 +83,10 @@ public class MainViewController implements Initializable {
             if (config.get("optional1_engaged").equals("true")) {
                 optional1.fire();
             }
-
         }
+        // Initializing spinner with default value & setting up step
+        SpinnerValueFactory<Integer> spinnerValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 360, 10, 1);
+        timerSpinner.setValueFactory(spinnerValueFactory);
     }
 
     // Loading config into HashMap
@@ -228,5 +234,13 @@ public class MainViewController implements Initializable {
     public void onButton5Pressed(ActionEvent actionEvent) {
         if (!isPortOpened) {openPortButton.fire();}
         sendCommand(config.get("button5_cmd"));
+    }
+
+    public void onTimerStartButtonPressed(ActionEvent actionEvent) {
+    }
+
+    public void onTimerValueScrolled(ScrollEvent scrollEvent) {
+        if (scrollEvent.getDeltaY() > 0){timerSpinner.increment();}
+        else {timerSpinner.decrement();}
     }
 }
