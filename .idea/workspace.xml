@@ -9,11 +9,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="85841248-5528-40c6-97e8-40cf812940b4" name="Changes" comment="Implement crude timer">
+    <list default="true" id="85841248-5528-40c6-97e8-40cf812940b4" name="Changes" comment="Further implement timer function, make a proper timeline reset, make a few cosmetic changes">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/MainView.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/MainView.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,6 +53,12 @@
                 <item name="RS232_remote" type="f1a62948:ProjectNode" />
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
                 <item name="build" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="RS232_remote" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="other" type="c8890929:TasksNode$1" />
               </path>
             </expand>
             <select />
@@ -259,7 +264,7 @@
       <workItem from="1752567349439" duration="12136000" />
       <workItem from="1752960836848" duration="598000" />
       <workItem from="1753083653363" duration="599000" />
-      <workItem from="1754295267880" duration="15322000" />
+      <workItem from="1754295267880" duration="20551000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
@@ -357,7 +362,15 @@
       <option name="project" value="LOCAL" />
       <updated>1754341126867</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Further implement timer function, make a proper timeline reset, make a few cosmetic changes">
+      <option name="closed" value="true" />
+      <created>1754399582099</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1754399582099</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -386,6 +399,7 @@
     <MESSAGE value="Fix optional1 not firing when engaged inf config by default" />
     <MESSAGE value="Add scrollable timer spinner, timer button and timer label" />
     <MESSAGE value="Implement crude timer" />
-    <option name="LAST_COMMIT_MESSAGE" value="Implement crude timer" />
+    <MESSAGE value="Further implement timer function, make a proper timeline reset, make a few cosmetic changes" />
+    <option name="LAST_COMMIT_MESSAGE" value="Further implement timer function, make a proper timeline reset, make a few cosmetic changes" />
   </component>
 </project>

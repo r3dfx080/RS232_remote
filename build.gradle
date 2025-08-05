@@ -52,7 +52,7 @@ test {
 jlink {
     jpackage {
         icon = "$rootDir/src/main/resources/org/foxprod/rs232_remote/icon.ico"
-        appVersion = getAppVersion();
+        appVersion = getAppVersion()
         installerType = "exe"
     }
     imageZip = project.file("${buildDir}/distributions/app-${javafx.platform.classifier}.zip")

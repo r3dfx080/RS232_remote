@@ -2,6 +2,7 @@ package org.foxprod.rs232_remote;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -231,9 +232,6 @@ public class MainViewController implements Initializable {
         timerTimeline.getKeyFrames().add(new KeyFrame(Duration.minutes(1), event -> {
             remainingDuration.setValue(remainingDuration.get().minus(1, ChronoUnit.MINUTES));
             if ((remainingDuration.get() == java.time.Duration.ofSeconds(-1)) || (remainingDuration.get() == java.time.Duration.ZERO)) {
-//                timerTimeline.stop();
-//                timerLabel.textProperty().unbind();
-//                timerLabel.setText("The timer is up");
 
                 stopBtn.fire();
                 timerStartButton.fire();
@@ -287,18 +285,32 @@ public class MainViewController implements Initializable {
             timerLabel.setText("");
 
             isTimerEngaged = false;
+            timerSpinner.setEditable(true);
+            Platform.runLater(() -> {
+                timerSpinner.lookupAll(".increment-arrow-button").forEach(node -> node.setDisable(false));
+                timerSpinner.lookupAll(".decrement-arrow-button").forEach(node -> node.setDisable(false));
+            });
             timerStartButton.setText("Start timer");
         }
         else {
             setUpTimer();
-
+            Platform.runLater(() -> {
+                timerSpinner.lookupAll(".increment-arrow-button").forEach(node -> node.setDisable(true));
+                timerSpinner.lookupAll(".decrement-arrow-button").forEach(node -> node.setDisable(true));
+            });
             isTimerEngaged = true;
+            timerSpinner.setEditable(false);
             timerStartButton.setText("Stop timer");
         }
     }
 
     public void onTimerValueScrolled(ScrollEvent scrollEvent) {
-        if (scrollEvent.getDeltaY() > 0){timerSpinner.increment();}
-        else {timerSpinner.decrement();}
+        if (!isTimerEngaged) {
+            if (scrollEvent.getDeltaY() > 0) {
+                timerSpinner.increment();
+            } else {
+                timerSpinner.decrement();
+            }
+        }
     }
 }
