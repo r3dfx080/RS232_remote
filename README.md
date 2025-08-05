@@ -1,25 +1,27 @@
 # Overview
-This is a software RS-232 remote aimed towards VCRs that don't have proper RS-422 connectionю
+This is a software RS-232 remote aimed towards VCRs that don't have proper RS-422 connection
 
 # Features
 
-* Automatic port opening & closing
-* 5 user-defined buttons + 1 checkbox
-* User-editable commands for all buttons
+* **Automatic port opening & closing**
+* **Built-in timer function**
+* **5 user-defined buttons + 1 checkbox**
+* **User-editable commands for all buttons**
 
 # Setup and usage
 
 This remote's default layout uses _Sony UVW-1200_ Betacam SP VCR command set. 
 
-<img width="844" height="403" alt="uvw1200" src="https://github.com/user-attachments/assets/8f6ceac7-750c-428f-bc54-05fe206ae2de" />
+<img width="844" height="482" alt="uvw1200" src="https://github.com/user-attachments/assets/0c51ad49-b7eb-4ba0-96a7-ab3c1a3151f0" />
 
 User editable settings are stored in **config.properties**
 
 The default button order is:
 
-<img width="839" height="346" alt="def" src="https://github.com/user-attachments/assets/ab7109c0-89bf-4b7e-bb6b-2e12647ef524" />
+<img width="841" height="429" alt="def" src="https://github.com/user-attachments/assets/66077ba7-b383-4577-8425-29d77c1f62b4" />
 
-<hr>
+
+## Customization
 
 In order to use customize this program you need to:
 
@@ -34,7 +36,17 @@ In order to use customize this program you need to:
 
 3. **Redefine basic commands**
 
-<hr>
+## Timer setup
+
+This remote has a resettable timer which allows for delayed _STOP_ command. It allows to stop a VCR remotely after a fixed time interval and should be used with a timer in capture software to end the recording around that point. 
+
+Timer has a **default value of 10 minutes** and displays remaining time in **_H:mm_ format**.
+
+Timer can be set in range between **1** and **360** **minutes** with 1 minute increment. You can enter the number manually or by **scrolling a mouse wheel**.
+
+<img width="844" height="482" alt="timer" src="https://github.com/user-attachments/assets/d6a35f2f-6104-446d-ac42-cb4a6942bd3c" />
+
+## Error handling
 
 Selected port will be opened **automatically** if you press any button. You will get a message if port can't be opened, there's an issue with output stream, etc.
 
