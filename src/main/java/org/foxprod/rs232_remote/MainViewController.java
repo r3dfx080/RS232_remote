@@ -33,7 +33,12 @@ public class MainViewController implements Initializable {
     Boolean isPortOpened = false,
             isTimerEngaged = false;
 
-    ObjectProperty<java.time.Duration> remainingDuration;
+    ObjectProperty<java.time.Duration> remainingDuration = new SimpleObjectProperty<>();
+
+    Timeline timerTimeline;
+
+    @FXML
+    private Button stopBtn;
 
     @FXML
     private Label timerLabel;
@@ -213,6 +218,32 @@ public class MainViewController implements Initializable {
         alert.showAndWait();
     }
 
+    // Setting up a timer from timerSpinner value
+    private void setUpTimer() {
+        timerTimeline = new Timeline();
+        remainingDuration.setValue(java.time.Duration.ofMinutes(timerSpinner.getValue()));
+        timerLabel.textProperty().bind(Bindings.createStringBinding(() ->
+                        String.format("%01d:%02d",
+                                remainingDuration.get().toHours(),
+                                remainingDuration.get().toMinutesPart()),
+                remainingDuration));
+
+        timerTimeline.getKeyFrames().add(new KeyFrame(Duration.minutes(1), event -> {
+            remainingDuration.setValue(remainingDuration.get().minus(1, ChronoUnit.MINUTES));
+            if ((remainingDuration.get() == java.time.Duration.ofSeconds(-1)) || (remainingDuration.get() == java.time.Duration.ZERO)) {
+//                timerTimeline.stop();
+//                timerLabel.textProperty().unbind();
+//                timerLabel.setText("The timer is up");
+
+                stopBtn.fire();
+                timerStartButton.fire();
+            }
+        }));
+
+        timerTimeline.setCycleCount(Timeline.INDEFINITE);
+        timerTimeline.play();
+    }
+
     // Optional checkbox enables RTS
     public void onOptionalClicked(ActionEvent actionEvent) {
         if (!isPortOpened) {openPortButton.fire();}
@@ -251,30 +282,15 @@ public class MainViewController implements Initializable {
 
     public void onTimerStartButtonPressed(ActionEvent actionEvent) {
         if (isTimerEngaged) {
+            timerTimeline.stop();
+            timerLabel.textProperty().unbind();
+            timerLabel.setText("");
+
             isTimerEngaged = false;
             timerStartButton.setText("Start timer");
         }
         else {
-            remainingDuration = new SimpleObjectProperty<>(java.time.Duration.ofSeconds(timerSpinner.getValue()));
-            timerLabel.textProperty().bind(Bindings.createStringBinding(() ->
-                            String.format("%02d:%02d:%02d",
-                            remainingDuration.get().toHours(),
-                            remainingDuration.get().toMinutesPart(),
-                            remainingDuration.get().toSecondsPart()),
-                    remainingDuration));
-
-            Timeline timerTimeline = new Timeline();
-            timerTimeline.getKeyFrames().add(new KeyFrame(Duration.seconds(1), event -> {
-                remainingDuration.setValue(remainingDuration.get().minus(1, ChronoUnit.SECONDS));
-                if ((remainingDuration.get() == java.time.Duration.ofSeconds(0)) || (remainingDuration.get() == java.time.Duration.ZERO)) {
-                    timerTimeline.stop();
-                    timerLabel.textProperty().unbind();
-                    timerLabel.setText("time is over!");
-                }
-            }));
-
-            timerTimeline.setCycleCount(Timeline.INDEFINITE);
-            timerTimeline.play();
+            setUpTimer();
 
             isTimerEngaged = true;
             timerStartButton.setText("Stop timer");
