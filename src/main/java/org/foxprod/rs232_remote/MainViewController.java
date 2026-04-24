@@ -1,5 +1,6 @@
 package org.foxprod.rs232_remote;
 
+import com.fazecast.jSerialComm.SerialPort;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -8,9 +9,14 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import com.fazecast.jSerialComm.SerialPort;
 import javafx.fxml.Initializable;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.input.ScrollEvent;
 import javafx.util.Duration;
 
@@ -19,7 +25,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.ResourceBundle;
 
 public class MainViewController implements Initializable {
 
@@ -40,41 +50,32 @@ public class MainViewController implements Initializable {
 
     @FXML
     private Button stopBtn;
-
     @FXML
     private Label timerLabel;
-
     @FXML
     private Button timerStartButton;
-
     @FXML
     private Spinner<Integer> timerSpinner;
-
     @FXML
     private Button button1;
-
     @FXML
     private Button button2;
-
     @FXML
     private Button button3;
-
     @FXML
     private Button button4;
-
     @FXML
     private Button button5;
-
     @FXML
     private CheckBox optional1;
-
     @FXML
     private Button openPortButton;
-
     @FXML
     private ComboBox<String> portsDropdown;
 
-    // Getting all ports from system and adding them to dropdown menu
+    /**
+     * Getting all ports from system and adding them to dropdown menu
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
@@ -82,8 +83,7 @@ public class MainViewController implements Initializable {
 
         if (ports.length == 0) {
             setAlertWithParameters(Alert.AlertType.WARNING, "No COM ports detected!");
-        }
-        else {
+        } else {
             for (SerialPort port : ports) {
                 portsDropdown.getItems().add(port.getSystemPortPath().substring(4));
             }
@@ -108,9 +108,12 @@ public class MainViewController implements Initializable {
         timerSpinner.setValueFactory(spinnerValueFactory);
     }
 
-    // Loading config into HashMap
+
+    /**
+     * Loading config into a HashMap
+     */
     public void loadConfig() {
-        try(FileInputStream fileInputStream = new FileInputStream("config.properties")) {
+        try (FileInputStream fileInputStream = new FileInputStream("config.properties")) {
             properties.load(fileInputStream);
             for (String key : properties.stringPropertyNames()) {
                 config.put(key, properties.getProperty(key));
@@ -121,10 +124,14 @@ public class MainViewController implements Initializable {
         }
     }
 
-    // Sending a command from String
+    /**
+     * Sending a command from String
+     *
+     * @param command command (hex)
+     */
     public void sendCommand(String command) {
         try {
-            portOutputStream.write(new byte[] { (byte) Integer.parseInt(command, 16) });
+            portOutputStream.write(new byte[]{(byte) Integer.parseInt(command, 16)});
             System.out.println("Sent " + Arrays.toString(new byte[]{(byte) Integer.parseInt(command, 16)}));
         } catch (IOException e) {
             setAlertWithParameters(Alert.AlertType.ERROR, "Error sending command: " + command);
@@ -137,49 +144,67 @@ public class MainViewController implements Initializable {
     }
 
     public void onEjectPressed(ActionEvent actionEvent) {
-        if (!isPortOpened) {openPortButton.fire();}
+        openPort();
         sendCommand(config.get("eject"));
     }
 
     public void onRewPressed(ActionEvent actionEvent) {
-        if (!isPortOpened) {openPortButton.fire();}
+        openPort();
         sendCommand(config.get("rew"));
     }
 
     public void onPlayPressed(ActionEvent actionEvent) {
-        if (!isPortOpened) {openPortButton.fire();}
+        openPort();
         sendCommand(config.get("play"));
     }
 
     public void onFFPressed(ActionEvent actionEvent) {
-        if (!isPortOpened) {openPortButton.fire();}
+        openPort();
         sendCommand(config.get("ff"));
     }
 
     public void onStopPressed(ActionEvent actionEvent) {
-        if (!isPortOpened) {openPortButton.fire();}
+        openPort();
         sendCommand(config.get("stop"));
     }
 
-    // Opening port if not open yet and changing button text accordingly
+    private void openPort() {
+        if (!isPortOpened) {
+            openPortButton.fire();
+        }
+    }
+
+    /**
+     * Opening port if not opened yet and changing button text accordingly
+     */
     public void onOpenPortPressed(ActionEvent actionEvent) {
-        if (isPortOpened){
+        if (isPortOpened) {
             closePort(activePort, portOutputStream);
 
             isPortOpened = false;
             openPortButton.setText("Open");
-        }
-        else {
+        } else {
             activePort = SerialPort.getCommPort(portsDropdown.getValue());
 
             portOutputStream = openPort(activePort);
             if (portOutputStream != null) {
                 isPortOpened = true;
                 openPortButton.setText("Close");
-            }
-            else {
+            } else {
                 setAlertWithParameters(Alert.AlertType.ERROR, "Error: could not open port");
             }
+        }
+    }
+
+    /**
+     * Optional checkbox enables RTS
+     */
+    public void onOptionalClicked(ActionEvent actionEvent) {
+        openPort();
+        if (optional1.isSelected()) {
+            activePort.setRTS();
+        } else {
+            activePort.clearRTS();
         }
     }
 
@@ -190,8 +215,7 @@ public class MainViewController implements Initializable {
             serialPort.openPort();
 
             return serialPort.getOutputStream();
-        }
-        else {
+        } else {
             setAlertWithParameters(Alert.AlertType.ERROR, "Error: serial port is null");
         }
         return null;
@@ -212,14 +236,21 @@ public class MainViewController implements Initializable {
         }
     }
 
-    // Setting up a custom Alert
-    void setAlertWithParameters(Alert.AlertType alertType, String text){
+    /**
+     * Setting up a custom alert with parameters
+     *
+     * @param alertType alert type
+     * @param text      displayed text
+     */
+    void setAlertWithParameters(Alert.AlertType alertType, String text) {
         Alert alert = new Alert(alertType);
         alert.setContentText(text);
         alert.showAndWait();
     }
 
-    // Setting up a timer from timerSpinner value
+    /**
+     * Setting up a timer from timerSpinner value
+     */
     private void setUpTimer() {
         timerTimeline = new Timeline();
         remainingDuration.setValue(java.time.Duration.ofMinutes(timerSpinner.getValue()));
@@ -242,39 +273,28 @@ public class MainViewController implements Initializable {
         timerTimeline.play();
     }
 
-    // Optional checkbox enables RTS
-    public void onOptionalClicked(ActionEvent actionEvent) {
-        if (!isPortOpened) {openPortButton.fire();}
-        if (optional1.isSelected()){
-            activePort.setRTS();
-        }
-        else {
-            activePort.clearRTS();
-        }
-    }
-
     public void onButton1Pressed(ActionEvent actionEvent) {
-        if (!isPortOpened) {openPortButton.fire();}
+        openPort();
         sendCommand(config.get("button1_cmd"));
     }
 
     public void onButton2Pressed(ActionEvent actionEvent) {
-        if (!isPortOpened) {openPortButton.fire();}
+        openPort();
         sendCommand(config.get("button2_cmd"));
     }
 
     public void onButton3Pressed(ActionEvent actionEvent) {
-        if (!isPortOpened) {openPortButton.fire();}
+        openPort();
         sendCommand(config.get("button3_cmd"));
     }
 
     public void onButton4Pressed(ActionEvent actionEvent) {
-        if (!isPortOpened) {openPortButton.fire();}
+        openPort();
         sendCommand(config.get("button4_cmd"));
     }
 
     public void onButton5Pressed(ActionEvent actionEvent) {
-        if (!isPortOpened) {openPortButton.fire();}
+        openPort();
         sendCommand(config.get("button5_cmd"));
     }
 
@@ -291,8 +311,7 @@ public class MainViewController implements Initializable {
                 timerSpinner.lookupAll(".decrement-arrow-button").forEach(node -> node.setDisable(false));
             });
             timerStartButton.setText("Start timer");
-        }
-        else {
+        } else {
             setUpTimer();
             Platform.runLater(() -> {
                 timerSpinner.lookupAll(".increment-arrow-button").forEach(node -> node.setDisable(true));

@@ -24,11 +24,8 @@ public class Main extends Application {
         stage.setTitle("RS-232 remote");
         stage.getIcons().add(new Image("file:src/main/resources/org/foxprod/rs232_remote/icon.png"));
         stage.setScene(scene);
+        stage.setAlwaysOnTop(true);
         stage.show();
-    }
-
-    public static void main(String[] args) {
-        launch();
     }
 
     @Override
