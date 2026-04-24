@@ -7,7 +7,6 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
@@ -143,27 +142,27 @@ public class MainViewController implements Initializable {
         closePort(activePort, portOutputStream);
     }
 
-    public void onEjectPressed(ActionEvent actionEvent) {
+    public void onEjectPressed() {
         openPort();
         sendCommand(config.get("eject"));
     }
 
-    public void onRewPressed(ActionEvent actionEvent) {
+    public void onRewPressed() {
         openPort();
         sendCommand(config.get("rew"));
     }
 
-    public void onPlayPressed(ActionEvent actionEvent) {
+    public void onPlayPressed() {
         openPort();
         sendCommand(config.get("play"));
     }
 
-    public void onFFPressed(ActionEvent actionEvent) {
+    public void onFFPressed() {
         openPort();
         sendCommand(config.get("ff"));
     }
 
-    public void onStopPressed(ActionEvent actionEvent) {
+    public void onStopPressed() {
         openPort();
         sendCommand(config.get("stop"));
     }
@@ -177,7 +176,7 @@ public class MainViewController implements Initializable {
     /**
      * Opening port if not opened yet and changing button text accordingly
      */
-    public void onOpenPortPressed(ActionEvent actionEvent) {
+    public void onOpenPortPressed() {
         if (isPortOpened) {
             closePort(activePort, portOutputStream);
 
@@ -199,7 +198,7 @@ public class MainViewController implements Initializable {
     /**
      * Optional checkbox enables RTS
      */
-    public void onOptionalClicked(ActionEvent actionEvent) {
+    public void onOptionalClicked() {
         openPort();
         if (optional1.isSelected()) {
             activePort.setRTS();
@@ -273,32 +272,32 @@ public class MainViewController implements Initializable {
         timerTimeline.play();
     }
 
-    public void onButton1Pressed(ActionEvent actionEvent) {
+    public void onButton1Pressed() {
         openPort();
         sendCommand(config.get("button1_cmd"));
     }
 
-    public void onButton2Pressed(ActionEvent actionEvent) {
+    public void onButton2Pressed() {
         openPort();
         sendCommand(config.get("button2_cmd"));
     }
 
-    public void onButton3Pressed(ActionEvent actionEvent) {
+    public void onButton3Pressed() {
         openPort();
         sendCommand(config.get("button3_cmd"));
     }
 
-    public void onButton4Pressed(ActionEvent actionEvent) {
+    public void onButton4Pressed() {
         openPort();
         sendCommand(config.get("button4_cmd"));
     }
 
-    public void onButton5Pressed(ActionEvent actionEvent) {
+    public void onButton5Pressed() {
         openPort();
         sendCommand(config.get("button5_cmd"));
     }
 
-    public void onTimerStartButtonPressed(ActionEvent actionEvent) {
+    public void onTimerStartButtonPressed() {
         if (isTimerEngaged) {
             timerTimeline.stop();
             timerLabel.textProperty().unbind();

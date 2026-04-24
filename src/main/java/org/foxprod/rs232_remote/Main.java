@@ -2,12 +2,12 @@ package org.foxprod.rs232_remote;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class Main extends Application {
 
@@ -22,7 +22,7 @@ public class Main extends Application {
 
         stage.setResizable(false);
         stage.setTitle("RS-232 remote");
-        stage.getIcons().add(new Image("file:src/main/resources/org/foxprod/rs232_remote/icon.png"));
+        stage.getIcons().add(new Image(Objects.requireNonNull(Main.class.getResourceAsStream("/org/foxprod/rs232_remote/icon.png"))));
         stage.setScene(scene);
         stage.setAlwaysOnTop(true);
         stage.show();
@@ -30,7 +30,7 @@ public class Main extends Application {
 
     @Override
     public void stop() throws Exception {
-        if (controller != null){
+        if (controller != null) {
             controller.closePortOnExit();
         }
         super.stop();

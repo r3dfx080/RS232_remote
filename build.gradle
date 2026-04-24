@@ -7,7 +7,7 @@ plugins {
 }
 
 group 'org.foxprod'
-version '0.5'
+version '0.6'
 
 repositories {
     mavenCentral()
@@ -20,7 +20,7 @@ ext {
 sourceCompatibility = '21'
 targetCompatibility = '21'
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
@@ -51,9 +51,13 @@ test {
 
 jlink {
     jpackage {
-        icon = "$rootDir/src/main/resources/org/foxprod/rs232_remote/icon.ico"
+        def winIcon = "${projectDir}/src/main/resources/org/foxprod/rs232_remote/icon.ico"
+        icon = winIcon
+        imageOptions = ['--icon', winIcon]
+        installerOptions = ['--icon', winIcon]
+        installerType = 'exe'
+        targetPlatformName = "win"
         appVersion = getAppVersion()
-        installerType = "exe"
     }
     imageZip = project.file("${buildDir}/distributions/app-${javafx.platform.classifier}.zip")
     targetPlatform("win") {

@@ -9,12 +9,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="85841248-5528-40c6-97e8-40cf812940b4" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/jmix-project.xml" afterDir="false" />
+    <list default="true" id="85841248-5528-40c6-97e8-40cf812940b4" name="Changes" comment="Make window always stay on top, make small refactorings, write Javadocs">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/MainView.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/MainView.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,6 +72,7 @@
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RESET_MODE" value="MIXED" />
   </component>
   <component name="GitHubPullRequestSearchHistory"><![CDATA[{
   "lastFilter": {
@@ -87,7 +87,7 @@
   }
 }]]></component>
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="ProjectErrors" />
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 7
@@ -257,8 +257,8 @@
     <recent_temporary>
       <list>
         <item itemvalue="Gradle.RS232_remote [run]" />
-        <item itemvalue="JAR Application.RS232_remote-0.2.jar" />
         <item itemvalue="Gradle.RS232_remote [jpackage]" />
+        <item itemvalue="JAR Application.RS232_remote-0.2.jar" />
         <item itemvalue="Gradle.RS232_remote [jlink]" />
         <item itemvalue="Gradle.RS232_remote [clean]" />
       </list>
@@ -296,7 +296,7 @@
       <workItem from="1755454929487" duration="645000" />
       <workItem from="1755686702357" duration="604000" />
       <workItem from="1755687709734" duration="222000" />
-      <workItem from="1777062268467" duration="972000" />
+      <workItem from="1777062268467" duration="1908000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
@@ -410,7 +410,23 @@
       <option name="project" value="LOCAL" />
       <updated>1754424648682</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="Make window always stay on top, make small refactorings, write javadocs">
+      <option name="closed" value="true" />
+      <created>1777063253205</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1777063253205</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Make window always stay on top, make small refactorings, write Javadocs">
+      <option name="closed" value="true" />
+      <created>1777063315847</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1777063315847</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -442,7 +458,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="feature/vhs-like-remote" />
+                        <option value="master" />
                       </list>
                     </value>
                   </entry>
@@ -468,6 +484,8 @@
     <MESSAGE value="Implement crude timer" />
     <MESSAGE value="Further implement timer function, make a proper timeline reset, make a few cosmetic changes" />
     <MESSAGE value="Add spinner lockup during timer activity" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add spinner lockup during timer activity" />
+    <MESSAGE value="Make window always stay on top, make small refactorings, write javadocs" />
+    <MESSAGE value="Make window always stay on top, make small refactorings, write Javadocs" />
+    <option name="LAST_COMMIT_MESSAGE" value="Make window always stay on top, make small refactorings, write Javadocs" />
   </component>
 </project>
