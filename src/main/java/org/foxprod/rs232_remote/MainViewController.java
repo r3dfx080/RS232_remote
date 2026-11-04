@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -40,6 +39,10 @@ public class MainViewController implements Initializable {
 
     OutputStream portOutputStream;
 
+    private boolean awaitingReply;
+    private boolean stopAfterReply;
+    private boolean reconnectRequired;
+
     Boolean isPortOpened = false,
             isTimerEngaged = false;
 
@@ -49,6 +52,8 @@ public class MainViewController implements Initializable {
 
     @FXML
     private Button stopBtn;
+    @FXML
+    private Button ejectBtn, rewBtn, playBtn, ffBtn;
     @FXML
     private Label timerLabel;
     @FXML
@@ -129,13 +134,69 @@ public class MainViewController implements Initializable {
      * @param command command (hex)
      */
     public void sendCommand(String command) {
-        try {
-            portOutputStream.write(new byte[]{(byte) Integer.parseInt(command, 16)});
-            System.out.println("Sent " + Arrays.toString(new byte[]{(byte) Integer.parseInt(command, 16)}));
-        } catch (IOException e) {
-            setAlertWithParameters(Alert.AlertType.ERROR, "Error sending command: " + command);
-            throw new RuntimeException(e);
+        if (portOutputStream == null || awaitingReply) {
+            return;
         }
+        if (reconnectRequired) {
+            setAlertWithParameters(Alert.AlertType.ERROR, "Close and reopen the port before sending another command.");
+            return;
+        }
+        final int value;
+        try {
+            value = Integer.parseInt(command, 16);
+            if (value < 0 || value > 0xff) {
+                throw new NumberFormatException();
+            }
+        } catch (NumberFormatException e) {
+            setAlertWithParameters(Alert.AlertType.ERROR, "Invalid command: " + command);
+            return;
+        }
+        sendWithAck(activePort, portOutputStream, value);
+    }
+
+    private void setAwaitingReply(boolean waiting) {
+        awaitingReply = waiting;
+        for (Button button : new Button[]{openPortButton, ejectBtn, rewBtn, playBtn, ffBtn,
+                stopBtn, button1, button2, button3, button4, button5}) {
+            button.setDisable(waiting);
+        }
+    }
+
+    private void sendWithAck(SerialPort port, OutputStream output, int command) {
+        setAwaitingReply(true);
+        Thread worker = new Thread(() -> {
+            int reply = -1;
+            try {
+                output.write(command);
+                reply = port.getInputStream().read();
+            } catch (IOException e) {
+                // A failed exchange leaves the next reply uncorrelated.
+            }
+            int received = reply;
+            Platform.runLater(() -> {
+                setAwaitingReply(false);
+                boolean stopDue = stopAfterReply;
+                stopAfterReply = false;
+                if (received == 0x06) {
+                    if (stopDue) {
+                        stopBtn.fire();
+                    }
+                    return;
+                }
+                if (received == 0x15) {
+                    setAlertWithParameters(Alert.AlertType.WARNING, "The IR adapter rejected the command.");
+                    if (stopDue && !awaitingReply) {
+                        stopBtn.fire();
+                    }
+                    return;
+                }
+                reconnectRequired = true;
+                setAlertWithParameters(Alert.AlertType.ERROR,
+                        "No valid reply. The command outcome is unknown. Close and reopen the port.");
+            });
+        }, "serial-command");
+        worker.setDaemon(true);
+        worker.start();
     }
 
     public void closePortOnExit() {
@@ -177,6 +238,9 @@ public class MainViewController implements Initializable {
      * Opening port if not opened yet and changing button text accordingly
      */
     public void onOpenPortPressed() {
+        if (awaitingReply) {
+            return;
+        }
         if (isPortOpened) {
             closePort(activePort, portOutputStream);
 
@@ -187,6 +251,7 @@ public class MainViewController implements Initializable {
 
             portOutputStream = openPort(activePort);
             if (portOutputStream != null) {
+                reconnectRequired = false;
                 isPortOpened = true;
                 openPortButton.setText("Close");
             } else {
@@ -209,9 +274,12 @@ public class MainViewController implements Initializable {
 
     public OutputStream openPort(SerialPort serialPort) {
         if (serialPort != null) {
-            serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 0, 0);
-
-            serialPort.openPort();
+            serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 5000, 0);
+            serialPort.setComPortParameters(9600, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
+            if (!serialPort.openPort()) {
+                return null;
+            }
+            serialPort.flushIOBuffers();
 
             return serialPort.getOutputStream();
         } else {
@@ -263,7 +331,11 @@ public class MainViewController implements Initializable {
             remainingDuration.setValue(remainingDuration.get().minus(1, ChronoUnit.MINUTES));
             if ((remainingDuration.get() == java.time.Duration.ofSeconds(-1)) || (remainingDuration.get() == java.time.Duration.ZERO)) {
 
-                stopBtn.fire();
+                if (awaitingReply) {
+                    stopAfterReply = true;
+                } else {
+                    stopBtn.fire();
+                }
                 timerStartButton.fire();
             }
         }));
