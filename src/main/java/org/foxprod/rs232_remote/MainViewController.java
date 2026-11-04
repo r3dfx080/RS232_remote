@@ -39,9 +39,9 @@ public class MainViewController implements Initializable {
 
     OutputStream portOutputStream;
 
-    private boolean awaitingReply;
-    private boolean stopAfterReply;
-    private boolean reconnectRequired;
+    boolean awaitingReply;
+    boolean stopAfterReply;
+    boolean reconnectRequired;
 
     Boolean isPortOpened = false,
             isTimerEngaged = false;
@@ -51,31 +51,31 @@ public class MainViewController implements Initializable {
     Timeline timerTimeline;
 
     @FXML
-    private Button stopBtn;
+    Button stopBtn;
     @FXML
-    private Button ejectBtn, rewBtn, playBtn, ffBtn;
+    Button ejectBtn, rewBtn, playBtn, ffBtn;
     @FXML
-    private Label timerLabel;
+    Label timerLabel;
     @FXML
-    private Button timerStartButton;
+    Button timerStartButton;
     @FXML
-    private Spinner<Integer> timerSpinner;
+    Spinner<Integer> timerSpinner;
     @FXML
-    private Button button1;
+    Button button1;
     @FXML
-    private Button button2;
+    Button button2;
     @FXML
-    private Button button3;
+    Button button3;
     @FXML
-    private Button button4;
+    Button button4;
     @FXML
-    private Button button5;
+    Button button5;
     @FXML
-    private CheckBox optional1;
+    CheckBox optional1;
     @FXML
-    private Button openPortButton;
+    Button openPortButton;
     @FXML
-    private ComboBox<String> portsDropdown;
+    ComboBox<String> portsDropdown;
 
     /**
      * Getting all ports from system and adding them to dropdown menu

@@ -9,9 +9,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="85841248-5528-40c6-97e8-40cf812940b4" name="Changes" comment="Implement command error checking">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" afterDir="false" />
+    <list default="true" id="85841248-5528-40c6-97e8-40cf812940b4" name="Changes" comment="Fix various bugs (timer, config importing, potential port silent failing)">
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -507,7 +506,8 @@
     <MESSAGE value="Make window always stay on top, make small refactorings, write Javadocs" />
     <MESSAGE value="Fix icon not being shown in .exe version, make minor refactorings" />
     <MESSAGE value="Implement command error checking" />
-    <option name="LAST_COMMIT_MESSAGE" value="Implement command error checking" />
+    <MESSAGE value="Fix various bugs (timer, config importing, potential port silent failing)" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix various bugs (timer, config importing, potential port silent failing)" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
