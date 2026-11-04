@@ -9,10 +9,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="85841248-5528-40c6-97e8-40cf812940b4" name="Changes" comment="Fix icon not being shown in .exe version, make minor refactorings">
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+    <list default="true" id="85841248-5528-40c6-97e8-40cf812940b4" name="Changes" comment="Implement command error checking">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" afterDir="false" />
     </list>
@@ -509,7 +506,8 @@
     <MESSAGE value="Make window always stay on top, make small refactorings, write javadocs" />
     <MESSAGE value="Make window always stay on top, make small refactorings, write Javadocs" />
     <MESSAGE value="Fix icon not being shown in .exe version, make minor refactorings" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fix icon not being shown in .exe version, make minor refactorings" />
+    <MESSAGE value="Implement command error checking" />
+    <option name="LAST_COMMIT_MESSAGE" value="Implement command error checking" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

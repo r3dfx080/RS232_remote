@@ -122,9 +122,10 @@ public class MainViewController implements Initializable {
             for (String key : properties.stringPropertyNames()) {
                 config.put(key, properties.getProperty(key));
             }
-        } catch (Exception e) {
-            setAlertWithParameters(Alert.AlertType.ERROR, "Error: could not load config file");
-            throw new RuntimeException(e);
+        } catch (IOException e) {
+            setAlertWithParameters(Alert.AlertType.ERROR,
+                    "Error: could not load config file. The application will close.");
+            Platform.exit();
         }
     }
 
@@ -185,7 +186,7 @@ public class MainViewController implements Initializable {
                 }
                 if (received == 0x15) {
                     setAlertWithParameters(Alert.AlertType.WARNING, "The IR adapter rejected the command.");
-                    if (stopDue && !awaitingReply) {
+                    if (stopDue) {
                         stopBtn.fire();
                     }
                     return;
@@ -265,6 +266,9 @@ public class MainViewController implements Initializable {
      */
     public void onOptionalClicked() {
         openPort();
+        if (activePort == null || !activePort.isOpen()) {
+            return;
+        }
         if (optional1.isSelected()) {
             activePort.setRTS();
         } else {
@@ -329,8 +333,7 @@ public class MainViewController implements Initializable {
 
         timerTimeline.getKeyFrames().add(new KeyFrame(Duration.minutes(1), event -> {
             remainingDuration.setValue(remainingDuration.get().minus(1, ChronoUnit.MINUTES));
-            if ((remainingDuration.get() == java.time.Duration.ofSeconds(-1)) || (remainingDuration.get() == java.time.Duration.ZERO)) {
-
+            if (remainingDuration.get().isZero() || remainingDuration.get().isNegative()) {
                 if (awaitingReply) {
                     stopAfterReply = true;
                 } else {
