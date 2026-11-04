@@ -7,7 +7,7 @@ plugins {
 }
 
 group 'org.foxprod'
-version '0.6'
+version '0.7'
 
 repositories {
     mavenCentral()
@@ -36,7 +36,7 @@ jar {
 }
 javafx {
     version = '21'
-    modules = ['javafx.base','javafx.controls', 'javafx.fxml']
+    modules = ['javafx.base', 'javafx.controls', 'javafx.fxml']
 }
 
 dependencies {
@@ -56,8 +56,9 @@ jlink {
         def winIcon = "${projectDir}/src/main/resources/org/foxprod/rs232_remote/icon.ico"
         icon = winIcon
         imageOptions = ['--icon', winIcon]
-        installerOptions = ['--icon', winIcon]
-        installerType = 'exe'
+        skipInstaller = true
+        //installerOptions = ['--icon', winIcon]
+        //installerType = 'exe'
         targetPlatformName = "win"
         appVersion = getAppVersion()
     }
@@ -71,6 +72,10 @@ jlink {
     }
 }
 
+tasks.named('jpackage') {
+    dependsOn(test)
+}
+
 tasks.jpackage.doLast {
     copy {
         from project.projectDir
@@ -81,4 +86,20 @@ tasks.jpackage.doLast {
 
 jlinkZip {
     group = 'distribution'
+}
+
+tasks.register('packageZip', Zip) {
+    dependsOn('jpackage')
+    group = 'distribution'
+    description = 'Zips the jpackage app image (with config.properties) using the project version in the filename'
+
+    def launcherName = jlink.launcherData.get().name
+
+    from layout.buildDirectory.dir("jpackage/${launcherName}")
+    into launcherName
+
+    archiveBaseName = 'RS232_remote'
+    archiveVersion = project.version
+    archiveClassifier = javafx.platform.classifier
+    destinationDirectory = layout.buildDirectory.dir('distributions')
 }
