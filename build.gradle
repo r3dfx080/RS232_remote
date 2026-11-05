@@ -55,7 +55,6 @@ dependencies {
 test {
     useJUnitPlatform()
 }
-
 jlink {
     jpackage {
         def winIcon = "${projectDir}/src/main/resources/org/foxprod/rs232_remote/icon.ico"
@@ -91,4 +90,20 @@ tasks.jpackage.doLast {
 
 jlinkZip {
     group = 'distribution'
+}
+
+tasks.register('packageZip', Zip) {
+    dependsOn('jpackage')
+    group = 'distribution'
+    description = 'Zips the jpackage app image (with config.properties) using the project version in the filename'
+
+    def launcherName = jlink.launcherData.get().name
+
+    from layout.buildDirectory.dir("jpackage/${launcherName}")
+    into launcherName
+
+    archiveBaseName = 'RS232_remote'
+    archiveVersion = project.version
+    archiveClassifier = javafx.platform.classifier
+    destinationDirectory = layout.buildDirectory.dir('distributions')
 }
