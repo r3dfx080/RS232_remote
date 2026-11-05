@@ -280,6 +280,8 @@ public class MainViewController implements Initializable {
         if (serialPort != null) {
             serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 5000, 0);
             serialPort.setComPortParameters(9600, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
+            // Avoid resetting the Nano just before the first command is sent.
+            serialPort.clearDTR();
             if (!serialPort.openPort()) {
                 return null;
             }
@@ -314,8 +316,12 @@ public class MainViewController implements Initializable {
      * @param text      displayed text
      */
     void setAlertWithParameters(Alert.AlertType alertType, String text) {
+        Label content = new Label(text);
+        content.setWrapText(true);
+
         Alert alert = new Alert(alertType);
-        alert.setContentText(text);
+        alert.initOwner(openPortButton.getScene().getWindow());
+        alert.getDialogPane().setContent(content);
         alert.showAndWait();
     }
 

@@ -9,9 +9,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="85841248-5528-40c6-97e8-40cf812940b4" name="Changes" comment="Add an extensive test suite">
+    <list default="true" id="85841248-5528-40c6-97e8-40cf812940b4" name="Changes" comment="Bump up app version, add .zip packaging">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/org/foxprod/rs232_remote/MainViewControllerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/foxprod/rs232_remote/MainViewControllerTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -125,7 +127,7 @@
     "Gradle.RS232_remote [jlink].executor": "Run",
     "Gradle.RS232_remote [jpackage].executor": "Run",
     "Gradle.RS232_remote [packageZip].executor": "Run",
-    "Gradle.RS232_remote [run].executor": "Run",
+    "Gradle.RS232_remote [run].executor": "Debug",
     "JAR Application.RS232_remote-0.2.jar.executor": "Run",
     "Repository.Attach.Annotations": "false",
     "Repository.Attach.JavaDocs": "true",
@@ -160,7 +162,7 @@
       <recent name="H:\Arkady\rs232_remote\RS232_remote\src\main\resources" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.CLEAN, TEST, PACKAGE">
+  <component name="RunManager" selected="Gradle.RUN">
     <configuration name="CLEAN, TEST, PACKAGE" type="GradleRunConfiguration" factoryName="Gradle">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -269,7 +271,7 @@
       <GradleCoverageDisabled>false</GradleCoverageDisabled>
       <method v="2" />
     </configuration>
-    <configuration name="RS232_remote [run]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="RUN" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -301,13 +303,13 @@
       <item itemvalue="Gradle.RS232_remote [clean]" />
       <item itemvalue="Gradle.RS232_remote [jlink]" />
       <item itemvalue="Gradle.RS232_remote [jpackage]" />
-      <item itemvalue="Gradle.RS232_remote [run]" />
+      <item itemvalue="Gradle.RUN" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.RUN" />
         <item itemvalue="Gradle.RS232_remote [clean]" />
         <item itemvalue="Gradle.RS232_remote [jpackage]" />
-        <item itemvalue="Gradle.RS232_remote [run]" />
         <item itemvalue="Gradle.RS232_remote [jlink]" />
       </list>
     </recent_temporary>
@@ -546,7 +548,8 @@
     <MESSAGE value="Implement command error checking" />
     <MESSAGE value="Fix various bugs (timer, config importing, potential port silent failing)" />
     <MESSAGE value="Add an extensive test suite" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add an extensive test suite" />
+    <MESSAGE value="Bump up app version, add .zip packaging" />
+    <option name="LAST_COMMIT_MESSAGE" value="Bump up app version, add .zip packaging" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

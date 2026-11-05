@@ -338,6 +338,21 @@ class MainViewControllerTest {
         }
 
         @Test
+        @DisplayName("clears DTR before opening to avoid resetting the Nano")
+        void clearsDtrBeforeOpening() {
+            SerialPort port = mock(SerialPort.class);
+            when(port.openPort()).thenReturn(true);
+            when(port.getOutputStream()).thenReturn(new ByteArrayOutputStream());
+
+            controller.openPort(port);
+
+            var order = org.mockito.Mockito.inOrder(port);
+            order.verify(port).clearDTR();
+            order.verify(port).openPort();
+            order.verify(port).getOutputStream();
+        }
+
+        @Test
         @DisplayName("null port alerts and returns null")
         void nullPortAlerts() {
             assertNull(controller.openPort(null));
