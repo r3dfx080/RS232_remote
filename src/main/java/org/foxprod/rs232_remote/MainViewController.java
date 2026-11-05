@@ -12,6 +12,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
@@ -19,21 +20,28 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.input.ScrollEvent;
 import javafx.util.Duration;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainViewController implements Initializable {
 
     SerialPort activePort;
 
     Properties properties = new Properties();
+    Path configPath = Path.of("config.properties");
 
     Map<String, String> config = new LinkedHashMap<>();
 
@@ -76,12 +84,15 @@ public class MainViewController implements Initializable {
     Button openPortButton;
     @FXML
     ComboBox<String> portsDropdown;
+    @FXML
+    CheckMenuItem showTimerItem, showCustomButtonsItem;
 
     /**
      * Getting all ports from system and adding them to dropdown menu
      */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        loadConfig();
 
         SerialPort[] ports = SerialPort.getCommPorts();
 
@@ -92,8 +103,6 @@ public class MainViewController implements Initializable {
                 portsDropdown.getItems().add(port.getSystemPortPath().substring(4));
             }
             portsDropdown.setValue(portsDropdown.getItems().getLast());
-
-            loadConfig();
 
             // Loading buttons' names from config file
             button1.setText(config.get("button1_name"));
@@ -115,18 +124,47 @@ public class MainViewController implements Initializable {
 
     @FXML
     public void onViewChanged() {
+        try {
+            String saved = Files.readString(configPath, StandardCharsets.ISO_8859_1);
+            saved = updateViewPreference(saved, "show_timer", showTimerItem.isSelected());
+            saved = updateViewPreference(saved, "show_user_buttons", showCustomButtonsItem.isSelected());
+            Path temporary = Files.createTempFile(configPath.toAbsolutePath().getParent(), "config-", ".tmp");
+            try {
+                Files.writeString(temporary, saved, StandardCharsets.ISO_8859_1);
+                Files.move(temporary, configPath, StandardCopyOption.REPLACE_EXISTING);
+            } finally {
+                Files.deleteIfExists(temporary);
+            }
+        } catch (IOException e) {
+            setAlertWithParameters(Alert.AlertType.ERROR, "Error: could not save View preferences to config file.");
+        }
         timerSpinner.getScene().getWindow().sizeToScene();
+    }
+
+    private static String updateViewPreference(String text, String key, boolean selected) {
+        Matcher entry = Pattern.compile("(?m)^([\\t ]*" + key
+                + "[\\t ]*[=:][\\t ]*)[^\\r\\n]*?([\\t ]*)(?=\\r?$)").matcher(text);
+        if (entry.find()) {
+            return entry.replaceAll("$1" + selected + "$2");
+        }
+        String newline = text.contains("\r\n") ? "\r\n" : "\n";
+        return text + (text.isEmpty() || text.endsWith("\n") ? "" : newline)
+                + key + "=" + selected + newline;
     }
 
     /**
      * Loading config into a HashMap
      */
     public void loadConfig() {
-        try (FileInputStream fileInputStream = new FileInputStream("config.properties")) {
+        try (InputStream fileInputStream = Files.newInputStream(configPath)) {
+            properties.clear();
             properties.load(fileInputStream);
+            config.clear();
             for (String key : properties.stringPropertyNames()) {
                 config.put(key, properties.getProperty(key));
             }
+            showTimerItem.setSelected(Boolean.parseBoolean(properties.getProperty("show_timer", "true").trim()));
+            showCustomButtonsItem.setSelected(Boolean.parseBoolean(properties.getProperty("show_user_buttons", "true").trim()));
         } catch (IOException e) {
             setAlertWithParameters(Alert.AlertType.ERROR,
                     "Error: could not load config file. The application will close.");

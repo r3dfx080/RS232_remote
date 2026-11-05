@@ -16,6 +16,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Properties;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
@@ -52,13 +57,16 @@ class MainViewControllerTest {
 
     @Test
     @DisplayName("Top View menu independently toggles timer and custom buttons without reserving hidden space")
-    void viewMenuTogglesSectionsIndependently() throws Exception {
+    void viewMenuTogglesSectionsIndependently(@TempDir Path directory) throws Exception {
+        Path preferences = directory.resolve("config.properties");
+        Files.writeString(preferences, "show_timer=true\nshow_user_buttons=false\nplay=3A\n");
         FutureTask<Void> check = new FutureTask<>(() -> {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("MainView.fxml"));
             loader.setControllerFactory(type -> new MainViewController() {
                 @Override
                 public void initialize(java.net.URL url, java.util.ResourceBundle resources) {
-                    // Skip serial-port discovery and config loading for this layout test.
+                    configPath = preferences;
+                    loadConfig();
                 }
             });
             VBox root = loader.load();
@@ -105,7 +113,20 @@ class MainViewControllerTest {
                 stage.show();
                 double timerOnlyHeight = stage.getHeight();
                 customItem.setSelected(true);
+                String original = "# custom buttons and their commands\r\nbutton3_name=SH >>\r\n\r\n"
+                        + "# basic buttons' commands\r\nplay=4B\r\n"
+                        + "# enable/disable modules showing\r\nshow_timer = true  \r\nshow_user_buttons=false\r\n";
+                Files.writeString(preferences, original);
                 customItem.fire();
+                assertEquals(original.replace("show_user_buttons=false", "show_user_buttons=true"),
+                        Files.readString(preferences), "Saving must preserve comments, order, whitespace and line endings");
+                Properties saved = new Properties();
+                try (InputStream input = Files.newInputStream(preferences)) {
+                    saved.load(input);
+                }
+                assertEquals("true  ", saved.getProperty("show_timer"));
+                assertEquals("true", saved.getProperty("show_user_buttons"));
+                assertEquals("4B", saved.getProperty("play"), "Saving visibility must preserve settings edited since startup");
                 root.layout();
                 assertTrue(stage.getHeight() > timerOnlyHeight, "Window must grow when another section is shown");
                 Node stop = (Node) loader.getNamespace().get("stopBtn");
@@ -114,8 +135,25 @@ class MainViewControllerTest {
                         "Transport buttons must keep their bottom margin with all sections visible");
                 customItem.setSelected(false);
                 customItem.fire();
+                assertEquals(original, Files.readString(preferences));
                 assertEquals(timerOnlyHeight, stage.getHeight(), 1.0,
                         "Window must shrink again when the section is hidden");
+                timerItem.setSelected(false);
+                timerItem.fire();
+                FXMLLoader reopened = new FXMLLoader(getClass().getResource("MainView.fxml"));
+                reopened.setControllerFactory(loader.getControllerFactory());
+                reopened.load();
+                assertFalse(((Node) reopened.getNamespace().get("timerSection")).isVisible());
+                assertFalse(((Node) reopened.getNamespace().get("customButtonsSection")).isVisible());
+                Files.writeString(preferences, "play=3A\n");
+                ((MainViewController) reopened.getController()).loadConfig();
+                assertTrue(((Node) reopened.getNamespace().get("timerSection")).isVisible(),
+                        "Timer defaults to visible when the preference is missing");
+                assertTrue(((Node) reopened.getNamespace().get("customButtonsSection")).isVisible(),
+                        "Custom buttons default to visible when the preference is missing");
+                customItem.fire();
+                assertEquals("play=3A\nshow_timer=false\nshow_user_buttons=false\n", Files.readString(preferences),
+                        "Missing preferences must be appended without rewriting existing settings");
             } finally {
                 stage.hide();
             }
