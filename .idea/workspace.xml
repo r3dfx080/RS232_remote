@@ -9,10 +9,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="85841248-5528-40c6-97e8-40cf812940b4" name="Changes" comment="Add View dropdown menu for hiding modules">
+    <list default="true" id="85841248-5528-40c6-97e8-40cf812940b4" name="Changes" comment="Implement View settings persistence via properties">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config.properties" beforeDir="false" afterPath="$PROJECT_DIR$/config.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/MainView.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/MainView.fxml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/test/java/org/foxprod/rs232_remote/MainViewControllerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/foxprod/rs232_remote/MainViewControllerTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -552,7 +554,8 @@
     <MESSAGE value="Bump up app version, add .zip packaging" />
     <MESSAGE value="Fix Arduino Nano accidental resetting, implement text wrap for alerts" />
     <MESSAGE value="Add View dropdown menu for hiding modules" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add View dropdown menu for hiding modules" />
+    <MESSAGE value="Implement View settings persistence via properties" />
+    <option name="LAST_COMMIT_MESSAGE" value="Implement View settings persistence via properties" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

@@ -71,7 +71,7 @@ class MainViewControllerTest {
                 javafx.scene.shape.Circle dot = (javafx.scene.shape.Circle) loader.getNamespace().get("deviceStatusIndicator");
                 assertEquals(5, dot.getRadius());
                 var siblings = ((javafx.scene.layout.HBox) dot.getParent()).getChildren();
-                assertEquals(siblings.indexOf(view.portsDropdown) + 1, siblings.indexOf(dot));
+                assertEquals(siblings.indexOf(view.openPortButton) + 1, siblings.indexOf(dot));
                 for (boolean available : new boolean[]{false, true, false}) {
                     view.deviceAvailable.set(available);
                     assertEquals(javafx.scene.paint.Color.web(available ? "#2e7d32" : "#d32f2f"), dot.getFill());
@@ -498,12 +498,14 @@ class MainViewControllerTest {
         void pingWritesEnquiryAndAcceptsOnlyPong() throws Exception {
             for (int response : new int[]{0x07, 0x06, 0x15, -1}) {
                 output.reset();
+                controller.missedHeartbeats = 0;
                 if (response == -1) reply(); else reply(response);
                 ping();
                 org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[]{0x05}, output.toByteArray());
                 assertEquals(response == 0x07, controller.deviceAvailable.get());
                 assertFalse(controller.reconnectRequired);
             }
+            controller.missedHeartbeats = 0;
             failRead();
             ping();
             assertFalse(controller.deviceAvailable.get());
@@ -519,6 +521,28 @@ class MainViewControllerTest {
             reply(0x07);
             ping();
             assertTrue(controller.deviceAvailable.get());
+        }
+
+        @Test
+        void twoMissedHeartbeatsDisconnect() throws Exception {
+            controller.deviceStatusIndicator = new javafx.scene.shape.Circle();
+            controller.isPortOpened = true;
+            // One miss stays connected.
+            reply();
+            ping();
+            assertTrue(controller.isPortOpened);
+            assertEquals(1, controller.missedHeartbeats);
+            // A PONG in between clears the count, so misses must be consecutive.
+            reply(0x07);
+            ping();
+            assertEquals(0, controller.missedHeartbeats);
+            // Two misses in a row close the port.
+            reply();
+            ping();
+            reply();
+            ping();
+            assertFalse(controller.isPortOpened);
+            verify(port).closePort();
         }
 
         @Test
@@ -557,7 +581,7 @@ class MainViewControllerTest {
             reply(0x07);
             ping();
             var order = org.mockito.Mockito.inOrder(port);
-            order.verify(port).setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 500, 0);
+            order.verify(port).setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 50, 0);
             order.verify(port).getInputStream();
             order.verify(port).setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 5000, 0);
             org.mockito.Mockito.clearInvocations(port);
@@ -578,6 +602,106 @@ class MainViewControllerTest {
             awaitExchangeComplete();
             assertTrue(controller.reconnectRequired);
             verify(controller).setAlertWithParameters(eq(Alert.AlertType.ERROR), any());
+        }
+
+        @Test
+        void commandPressedDuringHeartbeatRunsAfterIt() throws Exception {
+            CountDownLatch reading = new CountDownLatch(1);
+            CountDownLatch release = new CountDownLatch(1);
+            InputStream heldPong = new InputStream() {
+                public int read() throws IOException {
+                    reading.countDown();
+                    try {
+                        if (!release.await(5, TimeUnit.SECONDS)) throw new IOException("test timeout");
+                    } catch (InterruptedException e) {
+                        throw new IOException(e);
+                    }
+                    return 0x07;
+                }
+            };
+            when(port.getInputStream()).thenReturn(
+                    heldPong, new java.io.ByteArrayInputStream(new byte[]{0x06}));
+            onFx(controller::pingDevice);
+            assertTrue(reading.await(5, TimeUnit.SECONDS));
+            onFx(() -> {
+                assertTrue(controller.heartbeatInFlight);
+                controller.sendCommand("3A");
+                assertEquals(0x3A, controller.pendingCommand);
+                // Only the PING byte is out so far; the command must wait for the ping to finish.
+                assertEquals(1, output.size(), "Command must wait until the ping finishes");
+            });
+            release.countDown();
+            awaitExchangeComplete();
+            org.junit.jupiter.api.Assertions.assertArrayEquals(
+                    new byte[]{0x05, 0x3A}, output.toByteArray());
+            assertEquals(-1, controller.pendingCommand);
+            assertFalse(controller.reconnectRequired);
+        }
+
+        @Test
+        void latestPressWinsWhenQueuedDuringHeartbeat() throws Exception {
+            CountDownLatch reading = new CountDownLatch(1);
+            CountDownLatch release = new CountDownLatch(1);
+            InputStream heldPong = new InputStream() {
+                public int read() throws IOException {
+                    reading.countDown();
+                    try {
+                        if (!release.await(5, TimeUnit.SECONDS)) throw new IOException("test timeout");
+                    } catch (InterruptedException e) {
+                        throw new IOException(e);
+                    }
+                    return 0x07;
+                }
+            };
+            when(port.getInputStream()).thenReturn(
+                    heldPong, new java.io.ByteArrayInputStream(new byte[]{0x06}));
+            onFx(controller::pingDevice);
+            assertTrue(reading.await(5, TimeUnit.SECONDS));
+            onFx(() -> {
+                controller.sendCommand("3A");
+                controller.sendCommand("4B");
+                assertEquals(0x4B, controller.pendingCommand);
+            });
+            release.countDown();
+            awaitExchangeComplete();
+            org.junit.jupiter.api.Assertions.assertArrayEquals(
+                    new byte[]{0x05, 0x4B}, output.toByteArray());
+        }
+
+        @Test
+        void commandDuringRealCommandIsNotQueued() throws Exception {
+            CountDownLatch reading = new CountDownLatch(1);
+            CountDownLatch release = new CountDownLatch(1);
+            InputStream heldAck = new InputStream() {
+                public int read() throws IOException {
+                    reading.countDown();
+                    try {
+                        if (!release.await(5, TimeUnit.SECONDS)) throw new IOException("test timeout");
+                    } catch (InterruptedException e) {
+                        throw new IOException(e);
+                    }
+                    return 0x06;
+                }
+            };
+            when(port.getInputStream()).thenReturn(heldAck);
+            onFx(() -> controller.sendCommand("3A"));
+            assertTrue(reading.await(5, TimeUnit.SECONDS));
+            onFx(() -> {
+                assertFalse(controller.heartbeatInFlight);
+                controller.sendCommand("4B");
+                assertEquals(-1, controller.pendingCommand, "A real command in flight must not be queued over");
+            });
+            release.countDown();
+            awaitExchangeComplete();
+            org.junit.jupiter.api.Assertions.assertArrayEquals(
+                    new byte[]{0x3A}, output.toByteArray());
+        }
+
+        @Test
+        void closeDiscardsPendingCommand() throws Exception {
+            controller.pendingCommand = 0x3A;
+            onFx(() -> controller.closePort(port, output));
+            assertEquals(-1, controller.pendingCommand);
         }
 
         @Test
@@ -631,10 +755,13 @@ class MainViewControllerTest {
                     assertFalse(controller.deviceAvailable.get());
                     when(port.openPort()).thenReturn(true);
                     when(port.getOutputStream()).thenReturn(output);
+                    when(port.isOpen()).thenReturn(true);
+                    when(port.getInputStream()).thenReturn(new java.io.ByteArrayInputStream(new byte[]{0x07}));
+                    controller.deviceStatusIndicator = new javafx.scene.shape.Circle();
                     controller.onOpenPortPressed();
                     try {
                         assertEquals(javafx.animation.Animation.Status.RUNNING, controller.heartbeatTimeline.getStatus());
-                        assertEquals(1000, controller.heartbeatTimeline.getKeyFrames().getFirst().getTime().toMillis());
+                        assertEquals(3000, controller.heartbeatTimeline.getKeyFrames().getFirst().getTime().toMillis());
                         assertEquals(javafx.animation.Timeline.INDEFINITE, controller.heartbeatTimeline.getCycleCount());
                         controller.deviceAvailable.set(true);
                     } finally {
@@ -686,7 +813,8 @@ class MainViewControllerTest {
             try {
                 assertTrue(reading.await(5, TimeUnit.SECONDS));
                 onFx(() -> {
-                    assertTrue(controller.stopBtn.isDisabled());
+                    // Heartbeats no longer disable buttons, but a STOP still must wait for the
+                    // in-flight ping rather than firing twice.
                     assertTrue(controller.stopAfterReply, "STOP must wait for the heartbeat to finish");
                     assertEquals(0, stops.get());
                 });

@@ -7,7 +7,7 @@ plugins {
 }
 
 group 'org.foxprod'
-version '0.7'
+version '0.8'
 
 repositories {
     mavenCentral()
@@ -19,6 +19,10 @@ ext {
 
 sourceCompatibility = '21'
 targetCompatibility = '21'
+
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(21) }
+}
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
@@ -34,6 +38,7 @@ jar {
         attributes "Main-Class": 'org.foxprod.rs232_remote.Main'
     }
 }
+
 javafx {
     version = '21'
     modules = ['javafx.base', 'javafx.controls', 'javafx.fxml']

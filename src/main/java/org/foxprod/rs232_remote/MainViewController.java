@@ -53,11 +53,14 @@ public class MainViewController implements Initializable {
     OutputStream portOutputStream;
 
     boolean awaitingReply;
+    boolean heartbeatInFlight;
     boolean stopAfterReply;
     boolean reconnectRequired;
+    int pendingCommand = -1;
     final BooleanProperty deviceAvailable = new SimpleBooleanProperty(false);
     Timeline heartbeatTimeline;
     long connectionGeneration;
+    int missedHeartbeats;
 
     private static final int PING_COMMAND = 0x05;
     private static final int PONG_CODE = 0x07;
@@ -133,6 +136,8 @@ public class MainViewController implements Initializable {
         // Initializing spinner with default value & setting up step
         SpinnerValueFactory<Integer> spinnerValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 360, 10, 1);
         timerSpinner.setValueFactory(spinnerValueFactory);
+
+        deviceStatusIndicator.setVisible(false);
     }
 
     void initializeDeviceStatus() {
@@ -202,7 +207,7 @@ public class MainViewController implements Initializable {
      * @param command command (hex)
      */
     public void sendCommand(String command) {
-        if (portOutputStream == null || awaitingReply) {
+        if (portOutputStream == null) {
             return;
         }
         if (reconnectRequired) {
@@ -219,7 +224,28 @@ public class MainViewController implements Initializable {
             setAlertWithParameters(Alert.AlertType.ERROR, "Invalid command: " + command);
             return;
         }
+        if (awaitingReply) {
+            // A command pressed during a heartbeat runs once the ping finishes; the latest
+            // press wins. A real command already in flight must complete first, so drop.
+            if (heartbeatInFlight) {
+                pendingCommand = value;
+            }
+            return;
+        }
         sendWithAck(activePort, portOutputStream, value, false);
+    }
+
+    /**
+     * Sending a command that was pressed while a heartbeat held the port, if any
+     */
+    private void flushPendingCommand() {
+        if (pendingCommand < 0 || portOutputStream == null || reconnectRequired) {
+            pendingCommand = -1;
+            return;
+        }
+        int command = pendingCommand;
+        pendingCommand = -1;
+        sendWithAck(activePort, portOutputStream, command, false);
     }
 
     void pingDevice() {
@@ -233,53 +259,47 @@ public class MainViewController implements Initializable {
     }
 
     private void setAwaitingReply(boolean waiting) {
+        setAwaitingReply(waiting, true);
+    }
+
+    // Heartbeats hold the serial line but must not toggle the buttons, otherwise the
+    // whole control row flickers disabled on every 3-second ping.
+    private void setAwaitingReply(boolean waiting, boolean updateButtons) {
         awaitingReply = waiting;
-        for (Button button : new Button[]{openPortButton, ejectBtn, rewBtn, playBtn, ffBtn,
-                stopBtn, button1, button2, button3, button4, button5}) {
-            button.setDisable(waiting);
+        if (updateButtons) {
+            for (Button button : new Button[]{openPortButton, ejectBtn, rewBtn, playBtn, ffBtn,
+                    stopBtn, button1, button2, button3, button4, button5}) {
+                button.setDisable(waiting);
+            }
         }
     }
 
     private void sendWithAck(SerialPort port, OutputStream output, int command, boolean heartbeat) {
         long generation = connectionGeneration;
-        setAwaitingReply(true);
+        heartbeatInFlight = heartbeat;
+        setAwaitingReply(true, !heartbeat);
         Thread worker = new Thread(() -> {
-            int reply = -1;
-            try {
-                int timeout = heartbeat ? 500 : 5000;
-                port.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, timeout, 0);
-                output.write(command);
-                InputStream input = port.getInputStream();
-                long deadline = System.nanoTime() + timeout * 1_000_000L;
-                reply = input.read();
-                // A timed-out heartbeat can leave a PONG before the next command's ACK.
-                while (!heartbeat && reply == PONG_CODE) {
-                    long remaining = deadline - System.nanoTime();
-                    if (remaining <= 0) {
-                        reply = -1;
-                        break;
-                    }
-                    port.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING,
-                            (int) Math.max(1, (remaining + 999_999) / 1_000_000), 0);
-                    reply = input.read();
-                }
-            } catch (IOException e) {
-                // A failed exchange leaves the next reply uncorrelated.
-            } finally {
-                port.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 5000, 0);
-            }
-            int received = reply;
+            int received = exchange(port, output, command, heartbeat);
             Platform.runLater(() -> {
                 if (generation != connectionGeneration) {
                     return;
                 }
-                setAwaitingReply(false);
+                setAwaitingReply(false, !heartbeat);
+                heartbeatInFlight = false;
                 boolean stopDue = stopAfterReply;
                 stopAfterReply = false;
                 if (heartbeat) {
                     deviceAvailable.set(received == PONG_CODE);
-                    if (stopDue) {
-                        stopBtn.fire();
+                    if (received == PONG_CODE) {
+                        missedHeartbeats = 0;
+                        if (stopDue) {
+                            stopBtn.fire();
+                        }
+                        flushPendingCommand();
+                    } else if (++missedHeartbeats >= 2) {
+                        // Two misses in a row means the adapter is gone; close the port
+                        // so the user reconnects with a fresh handle via Open.
+                        disconnect();
                     }
                     return;
                 }
@@ -309,6 +329,40 @@ public class MainViewController implements Initializable {
         }, heartbeat ? "serial-heartbeat" : "serial-command");
         worker.setDaemon(true);
         worker.start();
+    }
+
+    /**
+     * Writing a command byte and reading the reply, skipping stray PONGs on command reads
+     *
+     * @param command   command byte
+     * @param heartbeat true for a ping, false for a remote command
+     * @return reply byte, or -1 on timeout or failure
+     */
+    private int exchange(SerialPort port, OutputStream output, int command, boolean heartbeat) {
+        int reply = -1;
+        try {
+            int timeout = heartbeat ? 50 : 5000;
+            port.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, timeout, 0);
+            output.write(command);
+            InputStream input = port.getInputStream();
+            long deadline = System.nanoTime() + timeout * 1_000_000L;
+            reply = input.read();
+            while (!heartbeat && reply == PONG_CODE) {
+                long remaining = deadline - System.nanoTime();
+                if (remaining <= 0) {
+                    return -1;
+                }
+                port.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING,
+                        (int) Math.max(1, (remaining + 999_999) / 1_000_000), 0);
+                reply = input.read();
+            }
+        } catch (IOException e) {
+            // A failed exchange leaves the next reply uncorrelated.
+            return -1;
+        } finally {
+            port.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 5000, 0);
+        }
+        return reply;
     }
 
     public void closePortOnExit() {
@@ -354,10 +408,7 @@ public class MainViewController implements Initializable {
             return;
         }
         if (isPortOpened) {
-            closePort(activePort, portOutputStream);
-
-            isPortOpened = false;
-            openPortButton.setText("Open");
+            disconnect();
         } else {
             activePort = SerialPort.getCommPort(portsDropdown.getValue());
 
@@ -366,11 +417,14 @@ public class MainViewController implements Initializable {
                 connectionGeneration++;
                 deviceAvailable.set(false);
                 reconnectRequired = false;
+                missedHeartbeats = 0;
                 isPortOpened = true;
+                deviceStatusIndicator.setVisible(true);
                 openPortButton.setText("Close");
-                heartbeatTimeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> pingDevice()));
+                heartbeatTimeline = new Timeline(new KeyFrame(Duration.seconds(3), event -> pingDevice()));
                 heartbeatTimeline.setCycleCount(Timeline.INDEFINITE);
                 heartbeatTimeline.play();
+                pingDevice();
             } else {
                 deviceAvailable.set(false);
                 setAlertWithParameters(Alert.AlertType.ERROR, "Error: could not open port");
@@ -391,6 +445,16 @@ public class MainViewController implements Initializable {
         } else {
             activePort.clearRTS();
         }
+    }
+
+    /**
+     * Closing the port and restoring the disconnected UI state
+     */
+    void disconnect() {
+        closePort(activePort, portOutputStream);
+        deviceStatusIndicator.setVisible(false);
+        isPortOpened = false;
+        openPortButton.setText("Open");
     }
 
     public OutputStream openPort(SerialPort serialPort) {
@@ -418,6 +482,8 @@ public class MainViewController implements Initializable {
         }
         deviceAvailable.set(false);
         stopAfterReply = false;
+        heartbeatInFlight = false;
+        pendingCommand = -1;
         setAwaitingReply(false);
         portOutputStream = null;
         isPortOpened = false;

@@ -49,13 +49,9 @@ Timer can be set in range between **1** and **360** **minutes** with 1 minute in
 
 ## Error handling
 
-The dot beside the COM port selector is green when the ATmega IR adapter replies to a heartbeat and red before the first reply, after a failed heartbeat, or when the port is closed. Its tooltip also describes the status. This checks the adapter, not whether the VCR received IR.
+The dot beside the COM port selector is green when the ATmega IR adapter replies to a heartbeat and red before the first reply, after a failed heartbeat, or when the port is closed. Its tooltip also describes the status.
 
-While a port is open and idle, the app sends one PING byte (`0x05`) every second and expects PONG (`0x07`) within 500 ms. Missed replies turn the dot red and retry silently on the next tick. Probes pause while a remote command is in flight, including the long eject sequence; existing command ACK (`0x06`), NAK (`0x15`) and five-second timeout behavior remain. Controls are disabled while an exchange is pending. Heartbeats stop when the port closes or the app exits.
-
-Use updated ATmega firmware and a bidirectional serial connection: MCU TX/PD1 must reach the adapter's receive input, in addition to the existing MCU RX/PD0 connection, with suitable serial level conversion and common ground. Older firmware and devices without this heartbeat protocol remain red. A failed remote command still requires closing and reopening the port, even if later heartbeats show green.
-
-The existing one-byte protocol has no request IDs. Late PONG bytes are ignored during command exchanges, but a severely delayed NAK from an older device or a corrupted ping can still be mistaken for the next command's rejection. Close and reopen the port after suspected serial errors.
+While a port is open and idle, the app sends one PING byte (`0x05`) every 3 seconds and expects PONG (`0x07`) within 50 ms. Missed replies turn the dot red and retry silently on the next tick. Probes pause while a remote command is in flight, including the long eject sequence; existing command ACK (`0x06`), NAK (`0x15`) and five-second timeout behavior remain. Controls are disabled while an exchange is pending.
 
 Selected port will be opened **automatically** if you press any button. You will get a message if port can't be opened, there's an issue with output stream, etc.
 
