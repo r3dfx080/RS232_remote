@@ -56,6 +56,38 @@ class MainViewControllerTest {
     private MainViewController controller;
 
     @Test
+    void deviceStatusDotTracksAvailability() throws Exception {
+        onFx(() -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("MainView.fxml"));
+                loader.setControllerFactory(type -> new MainViewController() {
+                    @Override
+                    public void initialize(java.net.URL url, java.util.ResourceBundle resources) {
+                        initializeDeviceStatus();
+                    }
+                });
+                loader.load();
+                MainViewController view = loader.getController();
+                javafx.scene.shape.Circle dot = (javafx.scene.shape.Circle) loader.getNamespace().get("deviceStatusIndicator");
+                assertEquals(5, dot.getRadius());
+                var siblings = ((javafx.scene.layout.HBox) dot.getParent()).getChildren();
+                assertEquals(siblings.indexOf(view.portsDropdown) + 1, siblings.indexOf(dot));
+                for (boolean available : new boolean[]{false, true, false}) {
+                    view.deviceAvailable.set(available);
+                    assertEquals(javafx.scene.paint.Color.web(available ? "#2e7d32" : "#d32f2f"), dot.getFill());
+                    String text = available ? "Device available" : "Device unavailable";
+                    assertEquals(text, dot.getAccessibleText());
+                    javafx.scene.control.Tooltip tooltip = (javafx.scene.control.Tooltip)
+                            dot.getProperties().get("javafx.scene.control.Tooltip");
+                    assertEquals(text, tooltip.getText());
+                }
+            } catch (IOException e) {
+                throw new AssertionError(e);
+            }
+        });
+    }
+
+    @Test
     @DisplayName("Top View menu independently toggles timer and custom buttons without reserving hidden space")
     void viewMenuTogglesSectionsIndependently(@TempDir Path directory) throws Exception {
         Path preferences = directory.resolve("config.properties");
@@ -425,6 +457,252 @@ class MainViewControllerTest {
 
             assertTrue(controller.reconnectRequired);
         }
+    }
+
+    @Nested
+    @DisplayName("adapter heartbeat")
+    class Heartbeat {
+        private SerialPort port;
+        private ByteArrayOutputStream output;
+
+        @BeforeEach
+        void prep() throws Exception {
+            stubButtons();
+            port = mock(SerialPort.class);
+            when(port.isOpen()).thenReturn(true);
+            output = new ByteArrayOutputStream();
+            controller.activePort = port;
+            controller.portOutputStream = output;
+        }
+
+        private void reply(int... bytes) throws Exception {
+            byte[] data = new byte[bytes.length];
+            for (int i = 0; i < bytes.length; i++) data[i] = (byte) bytes[i];
+            when(port.getInputStream()).thenReturn(new java.io.ByteArrayInputStream(data));
+        }
+
+        private void ping() throws Exception {
+            onFx(controller::pingDevice);
+            awaitExchangeComplete();
+        }
+
+        private void failRead() {
+            when(port.getInputStream()).thenReturn(new InputStream() {
+                public int read() throws IOException {
+                    throw new IOException("unplugged");
+                }
+            });
+        }
+
+        @Test
+        void pingWritesEnquiryAndAcceptsOnlyPong() throws Exception {
+            for (int response : new int[]{0x07, 0x06, 0x15, -1}) {
+                output.reset();
+                if (response == -1) reply(); else reply(response);
+                ping();
+                org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[]{0x05}, output.toByteArray());
+                assertEquals(response == 0x07, controller.deviceAvailable.get());
+                assertFalse(controller.reconnectRequired);
+            }
+            failRead();
+            ping();
+            assertFalse(controller.deviceAvailable.get());
+            assertFalse(controller.reconnectRequired);
+            verify(controller, never()).setAlertWithParameters(any(), any());
+        }
+
+        @Test
+        void failedPingCanRecover() throws Exception {
+            reply();
+            ping();
+            assertFalse(controller.deviceAvailable.get());
+            reply(0x07);
+            ping();
+            assertTrue(controller.deviceAvailable.get());
+        }
+
+        @Test
+        void remoteFailureTurnsDotRedButAllowsHeartbeat() throws Exception {
+            controller.deviceAvailable.set(true);
+            reply();
+            onFx(() -> controller.sendCommand("3A"));
+            awaitExchangeComplete();
+            assertFalse(controller.deviceAvailable.get());
+            assertTrue(controller.reconnectRequired);
+            reply(0x07);
+            ping();
+            assertTrue(controller.deviceAvailable.get());
+            assertTrue(controller.reconnectRequired, "Heartbeat must not clear an unknown command outcome");
+        }
+
+        @Test
+        void pingSkipsBusyAndClosedPorts() throws Exception {
+            controller.awaitingReply = true;
+            onFx(controller::pingDevice);
+            controller.awaitingReply = false;
+            controller.portOutputStream = null;
+            onFx(controller::pingDevice);
+            controller.portOutputStream = output;
+            when(port.isOpen()).thenReturn(false);
+            onFx(controller::pingDevice);
+            assertEquals(0, output.size());
+            when(port.isOpen()).thenReturn(true);
+            reply(0x07);
+            ping();
+            assertEquals(1, output.size());
+        }
+
+        @Test
+        void pingUsesShortTimeoutAndRestoresCommandTimeout() throws Exception {
+            reply(0x07);
+            ping();
+            var order = org.mockito.Mockito.inOrder(port);
+            order.verify(port).setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 500, 0);
+            order.verify(port).getInputStream();
+            order.verify(port).setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 5000, 0);
+            org.mockito.Mockito.clearInvocations(port);
+            failRead();
+            ping();
+            verify(port).setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 5000, 0);
+        }
+
+        @Test
+        void latePongDoesNotConsumeCommandAck() throws Exception {
+            reply(0x07, 0x06);
+            onFx(() -> controller.sendCommand("3A"));
+            awaitExchangeComplete();
+            assertFalse(controller.reconnectRequired);
+            verify(controller, never()).setAlertWithParameters(any(), any());
+            reply(0x07);
+            onFx(() -> controller.sendCommand("3A"));
+            awaitExchangeComplete();
+            assertTrue(controller.reconnectRequired);
+            verify(controller).setAlertWithParameters(eq(Alert.AlertType.ERROR), any());
+        }
+
+        @Test
+        void closeInvalidatesOldHeartbeat() throws Exception {
+            CountDownLatch reading = new CountDownLatch(1);
+            CountDownLatch release = new CountDownLatch(1);
+            var worker = new java.util.concurrent.atomic.AtomicReference<Thread>();
+            when(port.getInputStream()).thenReturn(new InputStream() {
+                public int read() throws IOException {
+                    assertFalse(Platform.isFxApplicationThread());
+                    worker.set(Thread.currentThread());
+                    reading.countDown();
+                    try {
+                        if (!release.await(5, TimeUnit.SECONDS)) throw new IOException("test timeout");
+                    } catch (InterruptedException e) {
+                        throw new IOException(e);
+                    }
+                    return 0x07;
+                }
+            });
+            controller.deviceAvailable.addListener((observable, before, after) -> {
+                if (after) throw new AssertionError("Old connection must not turn green");
+            });
+            onFx(controller::pingDevice);
+            assertTrue(reading.await(5, TimeUnit.SECONDS));
+            try {
+                when(port.isOpen()).thenReturn(false);
+                onFx(() -> controller.closePort(port, output));
+                assertNull(controller.portOutputStream);
+                assertFalse(controller.awaitingReply);
+                assertFalse(controller.deviceAvailable.get());
+            } finally {
+                release.countDown();
+            }
+            worker.get().join(5000);
+            assertFalse(worker.get().isAlive());
+            drainFxQueue();
+            assertFalse(controller.deviceAvailable.get());
+        }
+
+        @Test
+        void heartbeatLifecycle() throws Exception {
+            onFx(() -> {
+                controller.portsDropdown = mock(javafx.scene.control.ComboBox.class);
+                when(controller.portsDropdown.getValue()).thenReturn("COM1");
+                try (var serial = org.mockito.Mockito.mockStatic(SerialPort.class)) {
+                    serial.when(() -> SerialPort.getCommPort("COM1")).thenReturn(port);
+                    when(port.openPort()).thenReturn(false);
+                    controller.onOpenPortPressed();
+                    assertNull(controller.heartbeatTimeline);
+                    assertFalse(controller.deviceAvailable.get());
+                    when(port.openPort()).thenReturn(true);
+                    when(port.getOutputStream()).thenReturn(output);
+                    controller.onOpenPortPressed();
+                    try {
+                        assertEquals(javafx.animation.Animation.Status.RUNNING, controller.heartbeatTimeline.getStatus());
+                        assertEquals(1000, controller.heartbeatTimeline.getKeyFrames().getFirst().getTime().toMillis());
+                        assertEquals(javafx.animation.Timeline.INDEFINITE, controller.heartbeatTimeline.getCycleCount());
+                        controller.deviceAvailable.set(true);
+                    } finally {
+                        controller.closePortOnExit();
+                    }
+                    assertEquals(javafx.animation.Animation.Status.STOPPED, controller.heartbeatTimeline.getStatus());
+                    assertFalse(controller.deviceAvailable.get());
+                }
+            });
+        }
+
+        @Test
+        void pendingTimerStopSurvivesHeartbeat() throws Exception {
+            reply(0x07);
+            controller.stopAfterReply = true;
+            ping();
+            verify(controller.stopBtn).fire();
+            assertFalse(controller.stopAfterReply);
+        }
+
+        @Test
+        void pendingTimerStopSurvivesPingDuringRejectionDialog() throws Exception {
+            CountDownLatch reading = new CountDownLatch(1);
+            CountDownLatch release = new CountDownLatch(1);
+            var stops = new java.util.concurrent.atomic.AtomicInteger();
+            InputStream heldPong = new InputStream() {
+                public int read() throws IOException {
+                    reading.countDown();
+                    try {
+                        if (!release.await(5, TimeUnit.SECONDS)) throw new IOException("test timeout");
+                    } catch (InterruptedException e) {
+                        throw new IOException(e);
+                    }
+                    return 0x07;
+                }
+            };
+            when(port.getInputStream()).thenReturn(
+                    new java.io.ByteArrayInputStream(new byte[]{0x15}), heldPong);
+            org.mockito.Mockito.doAnswer(invocation -> {
+                controller.pingDevice();
+                return null;
+            }).when(controller).setAlertWithParameters(eq(Alert.AlertType.WARNING), any());
+            onFx(() -> {
+                controller.stopBtn = new Button();
+                controller.stopBtn.setOnAction(event -> stops.incrementAndGet());
+                controller.stopAfterReply = true;
+                controller.sendCommand("3A");
+            });
+            try {
+                assertTrue(reading.await(5, TimeUnit.SECONDS));
+                onFx(() -> {
+                    assertTrue(controller.stopBtn.isDisabled());
+                    assertTrue(controller.stopAfterReply, "STOP must wait for the heartbeat to finish");
+                    assertEquals(0, stops.get());
+                });
+            } finally {
+                release.countDown();
+                awaitExchangeComplete();
+            }
+            assertEquals(1, stops.get());
+            assertFalse(controller.stopAfterReply);
+        }
+    }
+
+    private static void onFx(Runnable action) throws Exception {
+        FutureTask<Void> task = new FutureTask<>(action, null);
+        Platform.runLater(task);
+        task.get(5, TimeUnit.SECONDS);
     }
 
     @Nested

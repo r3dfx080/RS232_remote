@@ -5,6 +5,8 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -17,7 +19,10 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.util.Duration;
 
 import java.io.IOException;
@@ -50,6 +55,12 @@ public class MainViewController implements Initializable {
     boolean awaitingReply;
     boolean stopAfterReply;
     boolean reconnectRequired;
+    final BooleanProperty deviceAvailable = new SimpleBooleanProperty(false);
+    Timeline heartbeatTimeline;
+    long connectionGeneration;
+
+    private static final int PING_COMMAND = 0x05;
+    private static final int PONG_CODE = 0x07;
 
     Boolean isPortOpened = false,
             isTimerEngaged = false;
@@ -85,6 +96,8 @@ public class MainViewController implements Initializable {
     @FXML
     ComboBox<String> portsDropdown;
     @FXML
+    Circle deviceStatusIndicator;
+    @FXML
     CheckMenuItem showTimerItem, showCustomButtonsItem;
 
     /**
@@ -92,6 +105,7 @@ public class MainViewController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        initializeDeviceStatus();
         loadConfig();
 
         SerialPort[] ports = SerialPort.getCommPorts();
@@ -119,6 +133,16 @@ public class MainViewController implements Initializable {
         // Initializing spinner with default value & setting up step
         SpinnerValueFactory<Integer> spinnerValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 360, 10, 1);
         timerSpinner.setValueFactory(spinnerValueFactory);
+    }
+
+    void initializeDeviceStatus() {
+        deviceStatusIndicator.fillProperty().bind(Bindings.when(deviceAvailable)
+                .then(Color.web("#2e7d32")).otherwise(Color.web("#d32f2f")));
+        deviceStatusIndicator.accessibleTextProperty().bind(Bindings.when(deviceAvailable)
+                .then("Device available").otherwise("Device unavailable"));
+        Tooltip tooltip = new Tooltip();
+        tooltip.textProperty().bind(deviceStatusIndicator.accessibleTextProperty());
+        Tooltip.install(deviceStatusIndicator, tooltip);
     }
 
 
@@ -195,7 +219,17 @@ public class MainViewController implements Initializable {
             setAlertWithParameters(Alert.AlertType.ERROR, "Invalid command: " + command);
             return;
         }
-        sendWithAck(activePort, portOutputStream, value);
+        sendWithAck(activePort, portOutputStream, value, false);
+    }
+
+    void pingDevice() {
+        if (awaitingReply || portOutputStream == null || activePort == null || !activePort.isOpen()) {
+            if (!awaitingReply) {
+                deviceAvailable.set(false);
+            }
+            return;
+        }
+        sendWithAck(activePort, portOutputStream, PING_COMMAND, true);
     }
 
     private void setAwaitingReply(boolean waiting) {
@@ -206,21 +240,49 @@ public class MainViewController implements Initializable {
         }
     }
 
-    private void sendWithAck(SerialPort port, OutputStream output, int command) {
+    private void sendWithAck(SerialPort port, OutputStream output, int command, boolean heartbeat) {
+        long generation = connectionGeneration;
         setAwaitingReply(true);
         Thread worker = new Thread(() -> {
             int reply = -1;
             try {
+                int timeout = heartbeat ? 500 : 5000;
+                port.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, timeout, 0);
                 output.write(command);
-                reply = port.getInputStream().read();
+                InputStream input = port.getInputStream();
+                long deadline = System.nanoTime() + timeout * 1_000_000L;
+                reply = input.read();
+                // A timed-out heartbeat can leave a PONG before the next command's ACK.
+                while (!heartbeat && reply == PONG_CODE) {
+                    long remaining = deadline - System.nanoTime();
+                    if (remaining <= 0) {
+                        reply = -1;
+                        break;
+                    }
+                    port.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING,
+                            (int) Math.max(1, (remaining + 999_999) / 1_000_000), 0);
+                    reply = input.read();
+                }
             } catch (IOException e) {
                 // A failed exchange leaves the next reply uncorrelated.
+            } finally {
+                port.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 5000, 0);
             }
             int received = reply;
             Platform.runLater(() -> {
+                if (generation != connectionGeneration) {
+                    return;
+                }
                 setAwaitingReply(false);
                 boolean stopDue = stopAfterReply;
                 stopAfterReply = false;
+                if (heartbeat) {
+                    deviceAvailable.set(received == PONG_CODE);
+                    if (stopDue) {
+                        stopBtn.fire();
+                    }
+                    return;
+                }
                 if (received == 0x06) {
                     if (stopDue) {
                         stopBtn.fire();
@@ -230,15 +292,21 @@ public class MainViewController implements Initializable {
                 if (received == 0x15) {
                     setAlertWithParameters(Alert.AlertType.WARNING, "The IR adapter rejected the command.");
                     if (stopDue) {
-                        stopBtn.fire();
+                        // The modal warning can run heartbeat callbacks while it is open.
+                        if (awaitingReply) {
+                            stopAfterReply = true;
+                        } else {
+                            stopBtn.fire();
+                        }
                     }
                     return;
                 }
                 reconnectRequired = true;
+                deviceAvailable.set(false);
                 setAlertWithParameters(Alert.AlertType.ERROR,
                         "No valid reply. The command outcome is unknown. Close and reopen the port.");
             });
-        }, "serial-command");
+        }, heartbeat ? "serial-heartbeat" : "serial-command");
         worker.setDaemon(true);
         worker.start();
     }
@@ -295,10 +363,16 @@ public class MainViewController implements Initializable {
 
             portOutputStream = openPort(activePort);
             if (portOutputStream != null) {
+                connectionGeneration++;
+                deviceAvailable.set(false);
                 reconnectRequired = false;
                 isPortOpened = true;
                 openPortButton.setText("Close");
+                heartbeatTimeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> pingDevice()));
+                heartbeatTimeline.setCycleCount(Timeline.INDEFINITE);
+                heartbeatTimeline.play();
             } else {
+                deviceAvailable.set(false);
                 setAlertWithParameters(Alert.AlertType.ERROR, "Error: could not open port");
             }
         }
@@ -338,17 +412,27 @@ public class MainViewController implements Initializable {
     }
 
     public void closePort(SerialPort serialPort, OutputStream outputStream) {
+        connectionGeneration++;
+        if (heartbeatTimeline != null) {
+            heartbeatTimeline.stop();
+        }
+        deviceAvailable.set(false);
+        stopAfterReply = false;
+        setAwaitingReply(false);
+        portOutputStream = null;
+        isPortOpened = false;
         if (serialPort != null && serialPort.isOpen()) {
             try {
-                outputStream.close();
+                if (outputStream != null) {
+                    outputStream.close();
+                }
             } catch (IOException e) {
                 setAlertWithParameters(Alert.AlertType.ERROR, "Error closing port");
-                throw new RuntimeException(e);
+            } finally {
+                serialPort.clearDTR();
+                serialPort.clearRTS();
+                serialPort.closePort();
             }
-            portOutputStream = null;
-            serialPort.clearDTR();
-            serialPort.clearRTS();
-            serialPort.closePort();
         }
     }
 
