@@ -113,6 +113,11 @@ public class MainViewController implements Initializable {
     }
 
 
+    @FXML
+    public void onViewChanged() {
+        timerSpinner.getScene().getWindow().sizeToScene();
+    }
+
     /**
      * Loading config into a HashMap
      */

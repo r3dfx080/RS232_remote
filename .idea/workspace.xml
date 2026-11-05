@@ -9,10 +9,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="85841248-5528-40c6-97e8-40cf812940b4" name="Changes" comment="Bump up app version, add .zip packaging">
+    <list default="true" id="85841248-5528-40c6-97e8-40cf812940b4" name="Changes" comment="Fix Arduino Nano accidental resetting, implement text wrap for alerts">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/foxprod/rs232_remote/MainViewController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/MainView.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/org/foxprod/rs232_remote/MainView.fxml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/test/java/org/foxprod/rs232_remote/MainViewControllerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/foxprod/rs232_remote/MainViewControllerTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -128,6 +127,7 @@
     "Gradle.RS232_remote [jpackage].executor": "Run",
     "Gradle.RS232_remote [packageZip].executor": "Run",
     "Gradle.RS232_remote [run].executor": "Debug",
+    "Gradle.RUN.executor": "Run",
     "JAR Application.RS232_remote-0.2.jar.executor": "Run",
     "Repository.Attach.Annotations": "false",
     "Repository.Attach.JavaDocs": "true",
@@ -549,7 +549,8 @@
     <MESSAGE value="Fix various bugs (timer, config importing, potential port silent failing)" />
     <MESSAGE value="Add an extensive test suite" />
     <MESSAGE value="Bump up app version, add .zip packaging" />
-    <option name="LAST_COMMIT_MESSAGE" value="Bump up app version, add .zip packaging" />
+    <MESSAGE value="Fix Arduino Nano accidental resetting, implement text wrap for alerts" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix Arduino Nano accidental resetting, implement text wrap for alerts" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

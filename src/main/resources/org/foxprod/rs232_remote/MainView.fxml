@@ -3,18 +3,31 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.CheckMenuItem?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="245.0"
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
       prefWidth="481.0" style="-fx-background-color: #F5F5F5;" xmlns="http://javafx.com/javafx/17.0.12"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.foxprod.rs232_remote.MainViewController">
     <children>
+        <MenuBar>
+            <menus>
+                <Menu text="_View">
+                    <items>
+                        <CheckMenuItem fx:id="showTimerItem" text="Timer" onAction="#onViewChanged"/>
+                        <CheckMenuItem fx:id="showCustomButtonsItem" text="Custom buttons" onAction="#onViewChanged"/>
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
         <HBox alignment="CENTER" prefHeight="14.0" prefWidth="605.0">
             <children>
                 <ComboBox fx:id="portsDropdown" maxHeight="10.0" minHeight="30.0" prefWidth="150.0"
@@ -38,7 +51,8 @@
                 <Insets bottom="5.0" top="10.0"/>
             </VBox.margin>
         </HBox>
-        <HBox alignment="CENTER" prefHeight="56.0" prefWidth="481.0">
+        <HBox fx:id="timerSection" visible="${showTimerItem.selected}" managed="${timerSection.visible}"
+              alignment="CENTER" prefHeight="56.0" prefWidth="481.0">
             <children>
                 <Button fx:id="timerStartButton" minHeight="30.0" mnemonicParsing="false"
                         onAction="#onTimerStartButtonPressed"
@@ -67,7 +81,8 @@
                 </Label>
             </children>
         </HBox>
-        <HBox alignment="CENTER" prefHeight="24.0" prefWidth="605.0">
+        <HBox fx:id="customButtonsSection" visible="${showCustomButtonsItem.selected}"
+              managed="${customButtonsSection.visible}" alignment="CENTER" prefHeight="24.0" prefWidth="605.0">
             <children>
                 <CheckBox fx:id="optional1" mnemonicParsing="false" onAction="#onOptionalClicked" text="Optional">
                     <HBox.margin>

@@ -2,8 +2,15 @@ package org.foxprod.rs232_remote;
 
 import com.fazecast.jSerialComm.SerialPort;
 import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.MenuBar;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,6 +18,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 import java.io.ByteArrayOutputStream;
@@ -41,6 +49,81 @@ import static org.mockito.Mockito.when;
 class MainViewControllerTest {
 
     private MainViewController controller;
+
+    @Test
+    @DisplayName("Top View menu independently toggles timer and custom buttons without reserving hidden space")
+    void viewMenuTogglesSectionsIndependently() throws Exception {
+        FutureTask<Void> check = new FutureTask<>(() -> {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("MainView.fxml"));
+            loader.setControllerFactory(type -> new MainViewController() {
+                @Override
+                public void initialize(java.net.URL url, java.util.ResourceBundle resources) {
+                    // Skip serial-port discovery and config loading for this layout test.
+                }
+            });
+            VBox root = loader.load();
+            assertTrue(root.getChildren().getFirst() instanceof MenuBar, "The menu bar must be at the top");
+            MenuBar menuBar = (MenuBar) root.getChildren().getFirst();
+            CheckMenuItem timerItem = (CheckMenuItem) menuBar.getMenus().getFirst().getItems().get(0);
+            CheckMenuItem customItem = (CheckMenuItem) menuBar.getMenus().getFirst().getItems().get(1);
+            Node timer = (Node) loader.getNamespace().get("timerSection");
+            Node custom = (Node) loader.getNamespace().get("customButtonsSection");
+            assertTrue(timer.isVisible());
+            assertTrue(timer.isManaged());
+            assertFalse(custom.isVisible());
+            assertFalse(custom.isManaged());
+
+            customItem.setSelected(true);
+            assertTrue(timer.isVisible());
+            assertTrue(timer.isManaged());
+            assertTrue(custom.isVisible());
+            assertTrue(custom.isManaged());
+
+            timerItem.setSelected(false);
+            assertFalse(timer.isVisible());
+            assertFalse(timer.isManaged());
+            assertTrue(custom.isVisible());
+            assertTrue(custom.isManaged());
+
+            customItem.setSelected(false);
+            assertFalse(timer.isVisible());
+            assertFalse(timer.isManaged());
+            assertFalse(custom.isVisible());
+            assertFalse(custom.isManaged());
+
+            timerItem.setSelected(true);
+            assertTrue(timer.isVisible());
+            assertTrue(timer.isManaged());
+            assertFalse(custom.isVisible());
+            assertFalse(custom.isManaged());
+
+            Platform.setImplicitExit(false);
+            Stage stage = new Stage();
+            stage.setResizable(false);
+            stage.setScene(new Scene(root));
+            try {
+                stage.show();
+                double timerOnlyHeight = stage.getHeight();
+                customItem.setSelected(true);
+                customItem.fire();
+                root.layout();
+                assertTrue(stage.getHeight() > timerOnlyHeight, "Window must grow when another section is shown");
+                Node stop = (Node) loader.getNamespace().get("stopBtn");
+                double buttonBottom = stop.localToScene(stop.getBoundsInLocal()).getMaxY();
+                assertTrue(stage.getScene().getHeight() - buttonBottom >= 14,
+                        "Transport buttons must keep their bottom margin with all sections visible");
+                customItem.setSelected(false);
+                customItem.fire();
+                assertEquals(timerOnlyHeight, stage.getHeight(), 1.0,
+                        "Window must shrink again when the section is hidden");
+            } finally {
+                stage.hide();
+            }
+            return null;
+        });
+        Platform.runLater(check);
+        check.get(5, TimeUnit.SECONDS);
+    }
 
     /** Start the JavaFX platform once so Platform.runLater(...) executes. */
     @BeforeAll
