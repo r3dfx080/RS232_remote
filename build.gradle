@@ -46,6 +46,7 @@ javafx {
 
 dependencies {
     implementation("com.fazecast:jSerialComm:[2.0.0,3.0.0)")
+    implementation("org.hid4java:hid4java:0.8.0")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
     testImplementation("org.mockito:mockito-core:5.11.0")
