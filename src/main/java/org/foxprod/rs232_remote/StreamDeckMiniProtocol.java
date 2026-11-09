@@ -97,6 +97,20 @@ final class StreamDeckMiniProtocol {
             throw new IOException("Stream Deck key artwork is unreadable; expected an "
                     + KEY_PIXELS + "x" + KEY_PIXELS + " PNG.");
         }
+        return encodeImage(source);
+    }
+
+    /**
+     * Encodes an upright {@value #KEY_PIXELS}x{@value #KEY_PIXELS} image that was
+     * rendered in memory rather than read from an asset.
+     *
+     * @return a complete 24-bit BMP file image
+     * @throws IOException when the image is absent or the wrong size
+     */
+    static byte[] encodeImage(BufferedImage source) throws IOException {
+        if (source == null) {
+            throw new IOException("Stream Deck key artwork is missing: no image was supplied.");
+        }
         if (source.getWidth() != KEY_PIXELS || source.getHeight() != KEY_PIXELS) {
             throw new IOException("Stream Deck key artwork must be "
                     + KEY_PIXELS + "x" + KEY_PIXELS + " pixels, but was "

@@ -158,7 +158,7 @@ class StreamDeckMiniProtocolTest {
 
     @Test
     void rejectsInvalidArtwork() {
-        assertThrows(IOException.class, () -> StreamDeckMiniProtocol.encodeImage(null));
+        assertThrows(IOException.class, () -> StreamDeckMiniProtocol.encodeImage((InputStream) null));
 
         assertThrows(IOException.class,
                 () -> StreamDeckMiniProtocol.encodeImage(new ByteArrayInputStream(new byte[]{1, 2, 3})));
