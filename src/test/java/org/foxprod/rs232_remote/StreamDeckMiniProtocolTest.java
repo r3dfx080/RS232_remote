@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HexFormat;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -141,6 +142,10 @@ class StreamDeckMiniProtocolTest {
         assertEquals('B', bmp[0] & 0xFF, "BMP signature");
         assertEquals('M', bmp[1] & 0xFF, "BMP signature");
         assertEquals(54 + 80 * 80 * 3, bmp.length, "80x80 24-bit BMP with no row padding");
+        assertArrayEquals(HexFormat.of().parseHex(
+                "424d364b0000000000003600000028000000500000005000000001001800"
+                        + "00000000004b0000130b0000130b00000000000000000000"),
+                Arrays.copyOf(bmp, 54), "preserve the 24-bit bottom-up BMP header, including 72 DPI");
 
         BufferedImage decoded = ImageIO.read(new ByteArrayInputStream(bmp));
         assertNotNull(decoded, "encoded bytes must be a readable BMP");

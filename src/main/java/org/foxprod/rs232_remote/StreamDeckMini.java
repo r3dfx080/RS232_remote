@@ -56,7 +56,6 @@ final class StreamDeckMini implements AutoCloseable {
 
     private final IntConsumer onAction;
     private final Executor callbacks;
-    private final HidServices suppliedServices;
     private final Supplier<HidServices> serviceFactory;
 
     /** {@code [page][key][report]} - the complete output reports for one key face. */
@@ -64,16 +63,15 @@ final class StreamDeckMini implements AutoCloseable {
 
     private final AtomicBoolean started = new AtomicBoolean();
     private final AtomicBoolean closed = new AtomicBoolean();
-    private final Object deviceLock = new Object();
 
     private final byte[] readBuffer = new byte[REPORT_BUFFER_BYTES];
     private final boolean[] held = new boolean[KEY_COUNT];
 
     private HidServices services;
-    private volatile HidDevice device;
+    private HidDevice device;
     private volatile boolean running = true;
     private volatile int generation;
-    private volatile int page;
+    private int page;
     private boolean seeded;
     private boolean reportedUnavailable;
     private Thread worker;
@@ -85,21 +83,20 @@ final class StreamDeckMini implements AutoCloseable {
      * @param images   the twelve encoded key images, page one first
      */
     StreamDeckMini(IntConsumer onAction, List<byte[]> images) {
-        this(onAction, Platform::runLater, null, StreamDeckMini::createServices, images);
+        this(onAction, Platform::runLater, StreamDeckMini::createServices, images);
     }
 
     /**
      * Test constructor: supplies the HID services and the callback executor.
      */
     StreamDeckMini(IntConsumer onAction, HidServices services, Executor callbacks, List<byte[]> images) {
-        this(onAction, callbacks, services, () -> services, images);
+        this(onAction, callbacks, () -> services, images);
     }
 
-    private StreamDeckMini(IntConsumer onAction, Executor callbacks, HidServices services,
+    private StreamDeckMini(IntConsumer onAction, Executor callbacks,
                            Supplier<HidServices> serviceFactory, List<byte[]> images) {
         this.onAction = onAction;
         this.callbacks = callbacks;
-        this.suppliedServices = services;
         this.serviceFactory = serviceFactory;
         this.pageReports = toPageReports(images);
     }
@@ -127,8 +124,8 @@ final class StreamDeckMini implements AutoCloseable {
     }
 
     /** Starts the worker. Calling this more than once has no effect. */
-    void start() {
-        if (!started.compareAndSet(false, true)) {
+    synchronized void start() {
+        if (closed.get() || !started.compareAndSet(false, true)) {
             return;
         }
         worker = new Thread(this::run, "stream-deck-mini");
@@ -138,7 +135,7 @@ final class StreamDeckMini implements AutoCloseable {
 
     private void run() {
         try {
-            services = suppliedServices != null ? suppliedServices : serviceFactory.get();
+            services = serviceFactory.get();
         } catch (Throwable failure) {
             // A missing native library must not take the desktop remote with it.
             LOG.log(Level.WARNING, "Stream Deck HID unavailable; keys are disabled.", failure);
@@ -157,6 +154,13 @@ final class StreamDeckMini implements AutoCloseable {
             LOG.log(Level.WARNING, "Stream Deck worker stopped unexpectedly.", failure);
         } finally {
             releaseDevice();
+            if (services != null) {
+                try {
+                    services.shutdown();
+                } catch (Throwable failure) {
+                    LOG.log(Level.FINE, "Stream Deck HID shutdown failed.", failure);
+                }
+            }
         }
     }
 
@@ -234,6 +238,9 @@ final class StreamDeckMini implements AutoCloseable {
         }
 
         for (int productId : PRODUCT_IDS) {
+            if (!running) {
+                return false;
+            }
             HidDevice found;
             try {
                 found = active.getHidDevice(VENDOR_ID, productId, null);
@@ -258,16 +265,18 @@ final class StreamDeckMini implements AutoCloseable {
                 continue;
             }
 
-            synchronized (deviceLock) {
-                device = found;
-                generation++;
-                page = 0;
-                seeded = false;
-                Arrays.fill(held, false);
+            if (!running) {
+                closeQuietly(found);
+                return false;
             }
+            device = found;
+            generation++;
+            page = 0;
+            seeded = false;
+            Arrays.fill(held, false);
             reportedUnavailable = false;
             uploadPage(0);
-            return true;
+            return device != null;
         }
         return false;
     }
@@ -282,7 +291,7 @@ final class StreamDeckMini implements AutoCloseable {
     private void uploadPage(int pageIndex) {
         for (List<byte[]> keyReports : pageReports.get(pageIndex)) {
             for (byte[] report : keyReports) {
-                if (!write(report)) {
+                if (!running || !write(report)) {
                     return; // stop this transfer; the device will be reconnected
                 }
             }
@@ -318,22 +327,18 @@ final class StreamDeckMini implements AutoCloseable {
 
     private void disconnect() {
         HidDevice current = device;
-        synchronized (deviceLock) {
-            device = null;
-            generation++;
-            page = 0;
-            seeded = false;
-            Arrays.fill(held, false);
-        }
+        device = null;
+        generation++;
+        page = 0;
+        seeded = false;
+        Arrays.fill(held, false);
         closeQuietly(current);
     }
 
     /** Restores the logo, then closes the device. */
     private void releaseDevice() {
         HidDevice current = device;
-        synchronized (deviceLock) {
-            device = null;
-        }
+        device = null;
         if (current == null) {
             return;
         }
@@ -363,6 +368,9 @@ final class StreamDeckMini implements AutoCloseable {
     }
 
     private void pause(long millis) {
+        if (!running) {
+            return;
+        }
         try {
             Thread.sleep(millis);
         } catch (InterruptedException interrupted) {
@@ -372,10 +380,11 @@ final class StreamDeckMini implements AutoCloseable {
 
     /**
      * Stops discovery, releases the device and shuts down the HID services.
+     * If a native call outlasts the exit wait, the worker cleans up when it returns.
      * Calling this more than once has no effect.
      */
     @Override
-    public void close() {
+    public synchronized void close() {
         if (!closed.compareAndSet(false, true)) {
             return;
         }
@@ -388,17 +397,6 @@ final class StreamDeckMini implements AutoCloseable {
                 current.join(REDISCOVERY_DELAY_MS);
             } catch (InterruptedException interrupted) {
                 Thread.currentThread().interrupt();
-            }
-        }
-
-        releaseDevice();
-
-        HidServices active = services;
-        if (active != null) {
-            try {
-                active.shutdown();
-            } catch (Throwable failure) {
-                LOG.log(Level.FINE, "Stream Deck HID shutdown failed.", failure);
             }
         }
     }

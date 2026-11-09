@@ -6,6 +6,9 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,11 +44,6 @@ final class StreamDeckMiniProtocol {
     static final int IMAGE_REPORT_LENGTH = 1024;
     static final int IMAGE_REPORT_HEADER_LENGTH = 16;
     static final int IMAGE_REPORT_PAYLOAD_LENGTH = IMAGE_REPORT_LENGTH - IMAGE_REPORT_HEADER_LENGTH;
-
-    private static final int BMP_FILE_HEADER_LENGTH = 14;
-    private static final int BMP_INFO_HEADER_LENGTH = 40;
-    private static final int BMP_PIXEL_OFFSET = BMP_FILE_HEADER_LENGTH + BMP_INFO_HEADER_LENGTH;
-    private static final int BMP_PIXELS_PER_METER = 2835; // 72 DPI
 
     private StreamDeckMiniProtocol() {
     }
@@ -117,7 +115,15 @@ final class StreamDeckMiniProtocol {
                     + source.getWidth() + "x" + source.getHeight() + ".");
         }
 
-        return toBitmap(rotateClockwise(source));
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        if (!ImageIO.write(rotateClockwise(source), "bmp", output)) {
+            throw new IOException("No BMP image writer is available for Stream Deck artwork.");
+        }
+        byte[] bitmap = output.toByteArray();
+        // Preserve the existing 72-DPI fields; ImageIO defaults these to zero.
+        ByteBuffer.wrap(bitmap).order(ByteOrder.LITTLE_ENDIAN)
+                .putInt(38, 2835).putInt(42, 2835);
+        return bitmap;
     }
 
     /**
@@ -179,50 +185,4 @@ final class StreamDeckMiniProtocol {
         return rotated;
     }
 
-    /** Writes a 24-bit, bottom-up, uncompressed BMP as the device requires. */
-    private static byte[] toBitmap(BufferedImage image) {
-        int width = image.getWidth();
-        int height = image.getHeight();
-        int rowLength = ((width * 3) + 3) & ~3;
-        int pixelBytes = rowLength * height;
-
-        byte[] bitmap = new byte[BMP_PIXEL_OFFSET + pixelBytes];
-        bitmap[0] = 'B';
-        bitmap[1] = 'M';
-        writeInt(bitmap, 2, bitmap.length);
-        writeInt(bitmap, 10, BMP_PIXEL_OFFSET);
-
-        writeInt(bitmap, 14, BMP_INFO_HEADER_LENGTH);
-        writeInt(bitmap, 18, width);
-        writeInt(bitmap, 22, height);
-        writeShort(bitmap, 26, 1);  // planes
-        writeShort(bitmap, 28, 24); // bits per pixel
-        writeInt(bitmap, 34, pixelBytes);
-        writeInt(bitmap, 38, BMP_PIXELS_PER_METER);
-        writeInt(bitmap, 42, BMP_PIXELS_PER_METER);
-
-        for (int y = 0; y < height; y++) {
-            int rowStart = BMP_PIXEL_OFFSET + (height - 1 - y) * rowLength; // BMP rows run bottom-up
-            for (int x = 0; x < width; x++) {
-                int rgb = image.getRGB(x, y);
-                int offset = rowStart + x * 3;
-                bitmap[offset] = (byte) (rgb & 0xFF);         // blue
-                bitmap[offset + 1] = (byte) ((rgb >> 8) & 0xFF);  // green
-                bitmap[offset + 2] = (byte) ((rgb >> 16) & 0xFF); // red
-            }
-        }
-        return bitmap;
-    }
-
-    private static void writeInt(byte[] target, int offset, int value) {
-        target[offset] = (byte) value;
-        target[offset + 1] = (byte) (value >> 8);
-        target[offset + 2] = (byte) (value >> 16);
-        target[offset + 3] = (byte) (value >> 24);
-    }
-
-    private static void writeShort(byte[] target, int offset, int value) {
-        target[offset] = (byte) value;
-        target[offset + 1] = (byte) (value >> 8);
-    }
 }

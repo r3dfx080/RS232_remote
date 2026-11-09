@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -25,7 +26,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyByte;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -114,10 +116,13 @@ class StreamDeckMiniTest {
             deck.await(() -> deck.writes.size() > beforeSwitch, "page two upload");
             assertEquals(0, deck.actions.size(), "a simultaneous transport press must be suppressed");
 
-            deck.release();          // key 0 was held across the switch and is released here
+            deck.press(0);           // release navigation, but keep key 0 held
+            deck.press(0);           // repeated held snapshot must not fire Custom 1
+            deck.release();
             deck.press(0);
             deck.awaitActions(1);
-            assertEquals(5, deck.actions.get(0), "the held key must not replay on page two");
+            deck.awaitInput();
+            assertEquals(List.of(5), List.copyOf(deck.actions), "the held key must not replay on page two");
 
             service.close();
         } finally {
@@ -254,7 +259,9 @@ class StreamDeckMiniTest {
             StreamDeckMini service = deck.start();
 
             deck.await(() -> deck.closes.get() >= 1, "failed upload closes the device");
-            verify(services(deck), atLeast(2)).getHidDevice(anyInt(), anyInt(), any());
+            verify(deck.services, times(1)).getHidDevice(anyInt(), anyInt(), any());
+            Thread.sleep(StreamDeckMini.REDISCOVERY_DELAY_MS / 4);
+            verify(deck.services, times(1)).getHidDevice(anyInt(), anyInt(), any());
 
             deck.failWrites = false;
             deck.await(() -> deck.writes.size() > 0, "recovered on a later attempt");
@@ -318,6 +325,39 @@ class StreamDeckMiniTest {
     }
 
     @Test
+    void closeDuringOpenLeavesCleanupToTheWorker() throws Exception {
+        try (Deck deck = new Deck()) {
+            CountDownLatch opening = new CountDownLatch(1);
+            CountDownLatch resume = new CountDownLatch(1);
+            when(deck.device.open()).thenAnswer(invocation -> {
+                opening.countDown();
+                // Native calls need not respond to Java interruption.
+                boolean waiting = true;
+                while (waiting) {
+                    try {
+                        resume.await();
+                        waiting = false;
+                    } catch (InterruptedException ignored) {
+                    }
+                }
+                return true;
+            });
+            StreamDeckMini service = deck.start();
+            try {
+                assertTrue(opening.await(5, TimeUnit.SECONDS), "worker reached open");
+                service.close();
+                verify(deck.services, never()).shutdown();
+                verify(deck.device, never()).close();
+            } finally {
+                resume.countDown();
+            }
+            verify(deck.services, timeout(5000).times(1)).shutdown();
+            verify(deck.device, times(1)).close();
+            assertTrue(deck.writes.isEmpty(), "no image may be uploaded after shutdown");
+        }
+    }
+
+    @Test
     void wireReportsCarryTheReportIdExactlyOnce() throws Exception {
         Deck deck = new Deck();
         try {
@@ -332,10 +372,6 @@ class StreamDeckMiniTest {
         } finally {
             deck.close();
         }
-    }
-
-    private static HidServices services(Deck deck) {
-        return deck.services;
     }
 
     /** A scripted Stream Deck: mocked HID services plus a queue of read results. */
@@ -414,6 +450,10 @@ class StreamDeckMiniTest {
             if (next == null) {
                 return 0;
             }
+            if (next instanceof CountDownLatch processed) {
+                processed.countDown();
+                return 0;
+            }
             if (next instanceof Integer code) {
                 return code;
             }
@@ -436,6 +476,12 @@ class StreamDeckMiniTest {
             System.arraycopy(payload, 0, wire, 1, length);
             writes.add(wire);
             return wire.length;
+        }
+
+        void awaitInput() throws InterruptedException {
+            CountDownLatch processed = new CountDownLatch(1);
+            reads.add(processed);
+            assertTrue(processed.await(5, TimeUnit.SECONDS), "queued reports were processed");
         }
 
         void awaitUploaded(int expectedWrites) throws InterruptedException {
