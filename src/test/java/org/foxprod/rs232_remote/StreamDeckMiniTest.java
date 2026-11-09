@@ -52,30 +52,31 @@ class StreamDeckMiniTest {
             deck.awaitUploaded(WRITES_PER_PAGE);
             deck.seed();
 
-            deck.press(0);
-            deck.awaitActions(1);
-            assertEquals(0, deck.actions.get(0), "page one key 0 is Eject");
+            for (int key : new int[]{0, 1, 3, 4, 5}) {
+                deck.press(key);
+                deck.awaitInput();
+                deck.release();
+                deck.awaitInput();
+            }
+            assertEquals(List.of(0, 4, 1, 2, 3), List.copyOf(deck.actions));
 
+            deck.press(2);
+            deck.awaitUploaded(2 * WRITES_PER_PAGE);
+            deck.release();
+            for (int key = 0; key < 5; key++) {
+                deck.press(key);
+                deck.awaitActions(6 + key);
+                deck.release();
+            }
+            deck.awaitInput();
+            assertEquals(List.of(0, 4, 1, 2, 3, 5, 6, 7, 8, 9), List.copyOf(deck.actions));
+
+            deck.press(5);
+            deck.awaitUploaded(3 * WRITES_PER_PAGE);
             deck.release();
             deck.press(1);
-            deck.awaitActions(2);
-            assertEquals(1, deck.actions.get(1), "page one key 1 is Rewind");
-
-            deck.release();
-            int beforeSwitch = deck.writes.size();
-            deck.press(StreamDeckMini.PAGE_KEY);
-            deck.await(() -> deck.writes.size() > beforeSwitch, "page two upload");
-            assertEquals(2, deck.actions.size(), "changing pages must not send a command");
-
-            deck.release();
-            deck.press(0);
-            deck.awaitActions(3);
-            assertEquals(5, deck.actions.get(2), "page two key 0 is Custom 1");
-
-            deck.release();
-            deck.press(4);
-            deck.awaitActions(4);
-            assertEquals(9, deck.actions.get(3), "page two key 4 is Custom 5");
+            deck.awaitActions(11);
+            assertEquals(4, deck.actions.get(10), "Back restores page one; top-middle is Stop");
 
             service.close();
         } finally {
@@ -93,10 +94,10 @@ class StreamDeckMiniTest {
             deck.awaitActions(1);
 
             deck.press(1); // identical report: still held, nothing may fire
-            deck.press(2);
+            deck.press(3);
             deck.awaitActions(2);
 
-            assertEquals(List.of(1, 2), List.copyOf(deck.actions));
+            assertEquals(List.of(4, 1), List.copyOf(deck.actions));
             service.close();
         } finally {
             deck.close();
@@ -172,10 +173,10 @@ class StreamDeckMiniTest {
             deck.awaitActions(1);
 
             deck.timeouts(5); // the buffer still holds "key 1 down"
-            deck.press(2);
+            deck.press(3);
             deck.awaitActions(2);
 
-            assertEquals(List.of(1, 2), List.copyOf(deck.actions), "a timeout must not re-fire key 1");
+            assertEquals(List.of(4, 1), List.copyOf(deck.actions), "a timeout must not re-fire key 1");
             service.close();
         } finally {
             deck.close();
@@ -196,7 +197,7 @@ class StreamDeckMiniTest {
             deck.press(1);
             deck.awaitActions(2);
 
-            assertEquals(List.of(1, 1), List.copyOf(deck.actions),
+            assertEquals(List.of(4, 4), List.copyOf(deck.actions),
                     "a malformed report must leave the key held, so the release is not a new press");
             service.close();
         } finally {

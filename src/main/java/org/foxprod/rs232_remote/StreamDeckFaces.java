@@ -34,7 +34,7 @@ final class StreamDeckFaces {
     static final String RESOURCE_ROOT = "/org/foxprod/rs232_remote/streamdeck/";
 
     /** Artwork filenames, in the order the keys appear on page 1, followed by "back". */
-    static final List<String> ARTWORK = List.of("eject", "rew", "play", "ff", "stop", "page2", "back");
+    static final List<String> ARTWORK = List.of("eject", "stop", "page2", "rew", "play", "ff", "back");
 
     private static final int SIZE = StreamDeckMiniProtocol.KEY_PIXELS;
     private static final int PADDING = 5;

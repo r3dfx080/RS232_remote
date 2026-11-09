@@ -56,6 +56,70 @@ class MainViewControllerTest {
     private MainViewController controller;
 
     @Test
+    void streamDeckDispatchMatchesDesktopButtons() throws Exception {
+        onFx(() -> {
+            var buttons = loadDeckButtons();
+            var fired = new java.util.ArrayList<Integer>();
+            for (int i = 0; i < buttons.size(); i++) {
+                int index = i;
+                buttons.get(i).setOnAction(event -> fired.add(index));
+            }
+            for (int action = 0; action < 10; action++) {
+                Main.fireStreamDeckAction(controller, action);
+            }
+            assertEquals(java.util.List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), fired);
+        });
+    }
+
+    @Test
+    void streamDeckHonorsDisabledButtons() throws Exception {
+        onFx(() -> {
+            var buttons = loadDeckButtons();
+            var fired = new java.util.ArrayList<Button>();
+            for (Button button : buttons) {
+                button.setOnAction(event -> fired.add(button));
+                button.setDisable(true);
+            }
+            for (int action = 0; action < 10; action++) {
+                Main.fireStreamDeckAction(controller, action);
+            }
+            assertTrue(fired.isEmpty());
+        });
+    }
+
+    @Test
+    void invalidDeckActionDoesNothing() throws Exception {
+        onFx(() -> {
+            var fired = new java.util.ArrayList<Button>();
+            for (Button button : loadDeckButtons()) {
+                button.setOnAction(event -> fired.add(button));
+            }
+            Main.fireStreamDeckAction(controller, -1);
+            Main.fireStreamDeckAction(controller, 10);
+            assertTrue(fired.isEmpty());
+        });
+    }
+
+    private java.util.List<Button> loadDeckButtons() {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("MainView.fxml"));
+        loader.setControllerFactory(type -> new MainViewController() {
+            @Override
+            public void initialize(java.net.URL url, java.util.ResourceBundle resources) {
+                // Load real FXML controls without touching serial hardware or user config.
+            }
+        });
+        try {
+            loader.load();
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+        controller = loader.getController();
+        return java.util.List.of(controller.ejectBtn, controller.rewBtn, controller.playBtn,
+                controller.ffBtn, controller.stopBtn, controller.button1, controller.button2,
+                controller.button3, controller.button4, controller.button5);
+    }
+
+    @Test
     void openWithoutSelectionWarnsWithoutLookingUpPort() throws Exception {
         onFx(() -> {
             controller.portsDropdown = new javafx.scene.control.ComboBox<>();

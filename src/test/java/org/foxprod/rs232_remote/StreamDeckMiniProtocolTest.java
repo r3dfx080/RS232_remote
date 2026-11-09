@@ -132,11 +132,18 @@ class StreamDeckMiniProtocolTest {
             g.fillRect(0, 0, 80, 80);
             g.setColor(new Color(255, 0, 0, 255));
             g.fillRect(0, 0, 10, 10);
+            g.setColor(Color.GREEN);
+            g.fillRect(70, 0, 10, 10);
+            g.setColor(Color.BLUE);
+            g.fillRect(0, 70, 10, 10);
+            g.setColor(Color.YELLOW);
+            g.fillRect(70, 70, 10, 10);
         } finally {
             g.dispose();
         }
 
         byte[] bmp = StreamDeckMiniProtocol.encodeImage(toStream(artwork));
+        assertArrayEquals(bmp, StreamDeckMiniProtocol.encodeImage(artwork));
 
         assertNotNull(bmp);
         assertEquals('B', bmp[0] & 0xFF, "BMP signature");
@@ -154,11 +161,14 @@ class StreamDeckMiniProtocolTest {
 
         int red = 0x00FF0000;
         int black = 0x00000000;
-        assertEquals(red, decoded.getRGB(79, 0) & 0x00FFFFFF, "source top-left marker rotates clockwise to the top-right");
-        assertEquals(red, decoded.getRGB(79, 9) & 0x00FFFFFF);
-        assertEquals(red, decoded.getRGB(70, 0) & 0x00FFFFFF);
-        assertEquals(black, decoded.getRGB(0, 0) & 0x00FFFFFF, "transparent artwork is composited onto black");
-        assertEquals(black, decoded.getRGB(79, 79) & 0x00FFFFFF, "orientation marker must not survive at the bottom-right");
+        // Mini reference driver: 90 degrees counterclockwise, then a vertical flip.
+        assertEquals(red, decoded.getRGB(0, 0) & 0x00FFFFFF);
+        assertEquals(red, decoded.getRGB(0, 9) & 0x00FFFFFF);
+        assertEquals(red, decoded.getRGB(9, 0) & 0x00FFFFFF);
+        assertEquals(0x0000FF, decoded.getRGB(79, 0) & 0x00FFFFFF, "source bottom-left becomes top-right");
+        assertEquals(0x00FF00, decoded.getRGB(0, 79) & 0x00FFFFFF, "source top-right becomes bottom-left");
+        assertEquals(0xFFFF00, decoded.getRGB(79, 79) & 0x00FFFFFF);
+        assertEquals(black, decoded.getRGB(40, 40) & 0x00FFFFFF, "transparent artwork is composited onto black");
     }
 
     @Test

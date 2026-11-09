@@ -22,7 +22,7 @@ import java.util.logging.Logger;
  * reports with a short timeout, uploads the six faces of the current page and
  * writes nothing on the JavaFX thread. Key presses are reported to
  * {@code onAction} as indices {@code 0-4} on page one and {@code 5-9} on page
- * two; the sixth key only switches pages and never produces an action.
+     * two; page one key 2 and page two key 5 only switch pages.
  *
  * <p>Only a new press is dispatched - a held key does not repeat, and a key that
  * is already down when the deck connects is treated as already held. Every
@@ -41,7 +41,8 @@ final class StreamDeckMini implements AutoCloseable {
     static final int[] PRODUCT_IDS = {0x0063, 0x0090, 0x00B3, 0x00B8};
 
     static final int KEY_COUNT = StreamDeckMiniProtocol.KEY_COUNT;
-    static final int PAGE_KEY = 5;
+    static final int PAGE_KEY = 2;
+    private static final int[] PAGE_ONE_ACTIONS = {0, 4, -1, 1, 2, 3};
     static final int ACTION_COUNT = 10;
 
     /** Matches Elgato's recommended polling period. */
@@ -203,7 +204,8 @@ final class StreamDeckMini implements AutoCloseable {
     }
 
     private void handle(boolean[] keys) {
-        if (keys[PAGE_KEY] && !held[PAGE_KEY]) {
+        int navigationKey = page == 0 ? PAGE_KEY : 5;
+        if (keys[navigationKey] && !held[navigationKey]) {
             // Navigation wins: other keys rising in the same report are suppressed,
             // and anything still held stays held on the new page until released.
             System.arraycopy(keys, 0, held, 0, KEY_COUNT);
@@ -212,10 +214,9 @@ final class StreamDeckMini implements AutoCloseable {
             return;
         }
 
-        int pageOffset = page * 5;
-        for (int key = 0; key < PAGE_KEY; key++) {
-            if (keys[key] && !held[key]) {
-                dispatch(pageOffset + key);
+        for (int key = 0; key < KEY_COUNT; key++) {
+            if (key != navigationKey && keys[key] && !held[key]) {
+                dispatch(page == 0 ? PAGE_ONE_ACTIONS[key] : 5 + key);
             }
         }
         System.arraycopy(keys, 0, held, 0, KEY_COUNT);

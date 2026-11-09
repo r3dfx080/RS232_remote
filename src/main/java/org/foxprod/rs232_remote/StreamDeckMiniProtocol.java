@@ -79,7 +79,7 @@ final class StreamDeckMiniProtocol {
      *
      * <p>The source must be an upright {@value #KEY_PIXELS}x{@value #KEY_PIXELS} image.
      * Transparency is composited onto black, the result is rotated 90 degrees
-     * clockwise for the Mini's display, and the BMP is written with the bottom-up
+     * counterclockwise then flipped vertically, and the BMP is written with the bottom-up
      * row order that the device expects. The caller owns {@code image}.
      *
      * @return a complete 24-bit BMP file image
@@ -116,7 +116,7 @@ final class StreamDeckMiniProtocol {
         }
 
         ByteArrayOutputStream output = new ByteArrayOutputStream();
-        if (!ImageIO.write(rotateClockwise(source), "bmp", output)) {
+        if (!ImageIO.write(orientForDevice(source), "bmp", output)) {
             throw new IOException("No BMP image writer is available for Stream Deck artwork.");
         }
         byte[] bitmap = output.toByteArray();
@@ -166,18 +166,19 @@ final class StreamDeckMiniProtocol {
     }
 
     /**
-     * Rotates an upright key image 90 degrees clockwise onto a black background.
+     * Applies the Mini's rotation and reflection onto a black background.
      * Transparent pixels therefore reach the device as black.
      */
-    private static BufferedImage rotateClockwise(BufferedImage source) {
+    private static BufferedImage orientForDevice(BufferedImage source) {
         BufferedImage rotated = new BufferedImage(KEY_PIXELS, KEY_PIXELS, BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics = rotated.createGraphics();
         try {
             graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
             graphics.setColor(Color.BLACK);
             graphics.fillRect(0, 0, KEY_PIXELS, KEY_PIXELS);
-            graphics.translate(KEY_PIXELS, 0);
+            // Equivalent to the reference driver's counterclockwise rotation then vertical flip.
             graphics.rotate(Math.PI / 2);
+            graphics.scale(1, -1);
             graphics.drawImage(source, 0, 0, null);
         } finally {
             graphics.dispose();

@@ -33,8 +33,8 @@ class StreamDeckFacesTest {
             assertEquals(SIZE, faces.get(i).getHeight(), "face " + i + " height");
         }
 
-        // Page 1: eject, rew, play, ff, stop, page2. Back sits last, at page 2 bottom-right.
-        List<String> artworkOrder = List.of("eject", "rew", "play", "ff", "stop", "page2");
+        // Page 1: eject, stop, page2, rew, play, ff. Back sits last, at page 2 bottom-right.
+        List<String> artworkOrder = List.of("eject", "stop", "page2", "rew", "play", "ff");
         for (int i = 0; i < artworkOrder.size(); i++) {
             assertEquals(fixture(artworkOrder.get(i)).getRGB(0, 0), faces.get(i).getRGB(0, 0),
                     "face " + i + " must be the " + artworkOrder.get(i) + " artwork");
