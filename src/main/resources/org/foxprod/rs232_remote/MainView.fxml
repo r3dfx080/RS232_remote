@@ -21,6 +21,14 @@
         </MenuBar>
         <HBox alignment="CENTER" prefHeight="14.0" prefWidth="605.0">
             <children>
+                <Button minHeight="30.0" mnemonicParsing="false" onAction="#onRescanPressed" style="-fx-border-radius: 0px; -fx-background-radius: 0px;" text="Rescan">
+                    <HBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                    </HBox.margin>
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Button>
                 <ComboBox fx:id="portsDropdown" maxHeight="10.0" minHeight="30.0" prefWidth="150.0" style="-fx-border-radius: 0px; -fx-background-radius: 0px;">
                     <HBox.margin>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />

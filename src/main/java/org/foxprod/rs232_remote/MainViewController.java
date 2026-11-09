@@ -111,33 +111,40 @@ public class MainViewController implements Initializable {
         initializeDeviceStatus();
         loadConfig();
 
-        SerialPort[] ports = SerialPort.getCommPorts();
+        onRescanPressed();
 
-        if (ports.length == 0) {
-            setAlertWithParameters(Alert.AlertType.WARNING, "No COM ports detected!");
-        } else {
-            for (SerialPort port : ports) {
-                portsDropdown.getItems().add(port.getSystemPortPath().substring(4));
-            }
-            portsDropdown.setValue(portsDropdown.getItems().getLast());
-
-            // Loading buttons' names from config file
-            button1.setText(config.get("button1_name"));
-            button2.setText(config.get("button2_name"));
-            button3.setText(config.get("button3_name"));
-            button4.setText(config.get("button4_name"));
-            button5.setText(config.get("button5_name"));
-            optional1.setText(config.get("optional1_name"));
-
-            if (config.get("optional1_engaged").equals("true")) {
-                optional1.fire();
-            }
-        }
+        // Loading buttons' names from config file
+        button1.setText(config.get("button1_name"));
+        button2.setText(config.get("button2_name"));
+        button3.setText(config.get("button3_name"));
+        button4.setText(config.get("button4_name"));
+        button5.setText(config.get("button5_name"));
+        optional1.setText(config.get("optional1_name"));
+        optional1.setSelected(Boolean.parseBoolean(config.get("optional1_engaged")));
         // Initializing spinner with default value & setting up step
         SpinnerValueFactory<Integer> spinnerValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 360, 10, 1);
         timerSpinner.setValueFactory(spinnerValueFactory);
 
         deviceStatusIndicator.setVisible(false);
+    }
+
+    @FXML
+    public void onRescanPressed() {
+        String selected = portsDropdown.getValue();
+        if (selected == null) {
+            selected = properties.getProperty("last_used_com", "").trim();
+        }
+        portsDropdown.getItems().clear();
+        for (SerialPort port : SerialPort.getCommPorts()) {
+            portsDropdown.getItems().add(port.getSystemPortName());
+        }
+        if (portsDropdown.getItems().isEmpty()) {
+            portsDropdown.setValue(null);
+            setAlertWithParameters(Alert.AlertType.WARNING, "No COM ports detected!");
+        } else {
+            portsDropdown.setValue(portsDropdown.getItems().contains(selected)
+                    ? selected : portsDropdown.getItems().getLast());
+        }
     }
 
     void initializeDeviceStatus() {
@@ -155,30 +162,44 @@ public class MainViewController implements Initializable {
     public void onViewChanged() {
         try {
             String saved = Files.readString(configPath, StandardCharsets.ISO_8859_1);
-            saved = updateViewPreference(saved, "show_timer", showTimerItem.isSelected());
-            saved = updateViewPreference(saved, "show_user_buttons", showCustomButtonsItem.isSelected());
-            Path temporary = Files.createTempFile(configPath.toAbsolutePath().getParent(), "config-", ".tmp");
-            try {
-                Files.writeString(temporary, saved, StandardCharsets.ISO_8859_1);
-                Files.move(temporary, configPath, StandardCopyOption.REPLACE_EXISTING);
-            } finally {
-                Files.deleteIfExists(temporary);
-            }
+            saved = updatePreference(saved, "show_timer", Boolean.toString(showTimerItem.isSelected()));
+            saved = updatePreference(saved, "show_user_buttons", Boolean.toString(showCustomButtonsItem.isSelected()));
+            saveConfigText(saved);
         } catch (IOException e) {
             setAlertWithParameters(Alert.AlertType.ERROR, "Error: could not save View preferences to config file.");
         }
         timerSpinner.getScene().getWindow().sizeToScene();
     }
 
-    private static String updateViewPreference(String text, String key, boolean selected) {
+    private void saveConfigText(String text) throws IOException {
+        Path temporary = Files.createTempFile(configPath.toAbsolutePath().getParent(), "config-", ".tmp");
+        try {
+            Files.writeString(temporary, text, StandardCharsets.ISO_8859_1);
+            Files.move(temporary, configPath, StandardCopyOption.REPLACE_EXISTING);
+        } finally {
+            Files.deleteIfExists(temporary);
+        }
+    }
+
+    void saveLastUsedPort(String port) {
+        properties.setProperty("last_used_com", port);
+        try {
+            String saved = Files.readString(configPath, StandardCharsets.ISO_8859_1);
+            saveConfigText(updatePreference(saved, "last_used_com", port));
+        } catch (IOException e) {
+            setAlertWithParameters(Alert.AlertType.ERROR, "Error: could not save last used COM port to config file.");
+        }
+    }
+
+    private static String updatePreference(String text, String key, String value) {
         Matcher entry = Pattern.compile("(?m)^([\\t ]*" + key
                 + "[\\t ]*[=:][\\t ]*)[^\\r\\n]*?([\\t ]*)(?=\\r?$)").matcher(text);
         if (entry.find()) {
-            return entry.replaceAll("$1" + selected + "$2");
+            return entry.replaceAll("$1" + Matcher.quoteReplacement(value) + "$2");
         }
         String newline = text.contains("\r\n") ? "\r\n" : "\n";
         return text + (text.isEmpty() || text.endsWith("\n") ? "" : newline)
-                + key + "=" + selected + newline;
+                + key + "=" + value + newline;
     }
 
     /**
@@ -410,6 +431,10 @@ public class MainViewController implements Initializable {
         if (isPortOpened) {
             disconnect();
         } else {
+            if (portsDropdown.getValue() == null) {
+                setAlertWithParameters(Alert.AlertType.WARNING, "Select a COM port first.");
+                return;
+            }
             activePort = SerialPort.getCommPort(portsDropdown.getValue());
 
             portOutputStream = openPort(activePort);
@@ -419,11 +444,13 @@ public class MainViewController implements Initializable {
                 reconnectRequired = false;
                 missedHeartbeats = 0;
                 isPortOpened = true;
+                onOptionalClicked();
                 deviceStatusIndicator.setVisible(true);
                 openPortButton.setText("Close");
                 heartbeatTimeline = new Timeline(new KeyFrame(Duration.seconds(3), event -> pingDevice()));
                 heartbeatTimeline.setCycleCount(Timeline.INDEFINITE);
                 heartbeatTimeline.play();
+                saveLastUsedPort(portsDropdown.getValue());
                 pingDevice();
             } else {
                 deviceAvailable.set(false);

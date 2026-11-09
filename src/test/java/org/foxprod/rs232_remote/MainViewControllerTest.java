@@ -56,6 +56,88 @@ class MainViewControllerTest {
     private MainViewController controller;
 
     @Test
+    void openWithoutSelectionWarnsWithoutLookingUpPort() throws Exception {
+        onFx(() -> {
+            controller.portsDropdown = new javafx.scene.control.ComboBox<>();
+            try (var serial = org.mockito.Mockito.mockStatic(SerialPort.class)) {
+                controller.onOpenPortPressed();
+                serial.verifyNoInteractions();
+                verify(controller).setAlertWithParameters(Alert.AlertType.WARNING, "Select a COM port first.");
+                assertFalse(controller.isPortOpened);
+            }
+        });
+    }
+
+    @Test
+    void startupWithoutPortsLoadsCustomSettings(@TempDir Path directory) throws Exception {
+        Path preferences = directory.resolve("config.properties");
+        Files.writeString(preferences, "button1_name=Custom\noptional1_name=Dolby\noptional1_engaged=true\n");
+        onFx(() -> {
+            try (var serial = org.mockito.Mockito.mockStatic(SerialPort.class)) {
+                serial.when(SerialPort::getCommPorts).thenReturn(new SerialPort[0]);
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("MainView.fxml"));
+                controller.configPath = preferences;
+                loader.setControllerFactory(type -> controller);
+                try {
+                    loader.load();
+                } catch (IOException e) {
+                    throw new AssertionError(e);
+                }
+                assertEquals("Custom", controller.button1.getText());
+                assertEquals("Dolby", controller.optional1.getText());
+                assertTrue(controller.optional1.isSelected());
+                assertFalse(controller.isPortOpened);
+                serial.verify(() -> SerialPort.getCommPort(any()), never());
+            }
+        });
+    }
+
+    @Test
+    void rescanReplacesPortsAndPreservesAvailableSelection() throws Exception {
+        onFx(() -> {
+            controller.portsDropdown = new javafx.scene.control.ComboBox<>();
+            SerialPort first = mock(SerialPort.class);
+            SerialPort second = mock(SerialPort.class);
+            when(first.getSystemPortName()).thenReturn("COM1");
+            when(second.getSystemPortName()).thenReturn("COM2");
+            try (var serial = org.mockito.Mockito.mockStatic(SerialPort.class)) {
+                serial.when(SerialPort::getCommPorts).thenReturn(new SerialPort[]{first, second});
+                controller.onRescanPressed();
+                assertEquals(java.util.List.of("COM1", "COM2"), controller.portsDropdown.getItems());
+                assertEquals("COM2", controller.portsDropdown.getValue());
+                controller.properties.setProperty("last_used_com", "COM1");
+                controller.portsDropdown.setValue(null);
+                controller.onRescanPressed();
+                assertEquals("COM1", controller.portsDropdown.getValue());
+                controller.portsDropdown.setValue("COM1");
+                controller.onRescanPressed();
+                assertEquals(2, controller.portsDropdown.getItems().size());
+                assertEquals("COM1", controller.portsDropdown.getValue());
+                serial.when(SerialPort::getCommPorts).thenReturn(new SerialPort[]{second});
+                controller.onRescanPressed();
+                assertEquals("COM2", controller.portsDropdown.getValue());
+                serial.when(SerialPort::getCommPorts).thenReturn(new SerialPort[0]);
+                controller.onRescanPressed();
+                assertTrue(controller.portsDropdown.getItems().isEmpty());
+                assertNull(controller.portsDropdown.getValue());
+                verify(controller).setAlertWithParameters(Alert.AlertType.WARNING, "No COM ports detected!");
+            }
+        });
+    }
+
+    @Test
+    void lastUsedPortIsSavedWithoutChangingOtherProperties(@TempDir Path directory) throws Exception {
+        controller.configPath = directory.resolve("config.properties");
+        String original = "# keep this comment\r\nplay=3A\r\nshow_timer=false\r\n";
+        Files.writeString(controller.configPath, original);
+        controller.saveLastUsedPort("COM4");
+        assertEquals(original + "last_used_com=COM4\r\n", Files.readString(controller.configPath));
+        controller.saveLastUsedPort("COM7");
+        assertEquals(original + "last_used_com=COM7\r\n", Files.readString(controller.configPath));
+        assertEquals("COM7", controller.properties.getProperty("last_used_com"));
+    }
+
+    @Test
     void deviceStatusDotTracksAvailability() throws Exception {
         onFx(() -> {
             try {
@@ -745,6 +827,9 @@ class MainViewControllerTest {
         @Test
         void heartbeatLifecycle() throws Exception {
             onFx(() -> {
+                controller.optional1 = mock(javafx.scene.control.CheckBox.class);
+                when(controller.optional1.isSelected()).thenReturn(true);
+                doNothing().when(controller).saveLastUsedPort(any());
                 controller.portsDropdown = mock(javafx.scene.control.ComboBox.class);
                 when(controller.portsDropdown.getValue()).thenReturn("COM1");
                 try (var serial = org.mockito.Mockito.mockStatic(SerialPort.class)) {
@@ -752,6 +837,7 @@ class MainViewControllerTest {
                     when(port.openPort()).thenReturn(false);
                     controller.onOpenPortPressed();
                     assertNull(controller.heartbeatTimeline);
+                    verify(controller, never()).saveLastUsedPort(any());
                     assertFalse(controller.deviceAvailable.get());
                     when(port.openPort()).thenReturn(true);
                     when(port.getOutputStream()).thenReturn(output);
@@ -759,6 +845,8 @@ class MainViewControllerTest {
                     when(port.getInputStream()).thenReturn(new java.io.ByteArrayInputStream(new byte[]{0x07}));
                     controller.deviceStatusIndicator = new javafx.scene.shape.Circle();
                     controller.onOpenPortPressed();
+                    verify(controller).saveLastUsedPort("COM1");
+                    verify(port).setRTS();
                     try {
                         assertEquals(javafx.animation.Animation.Status.RUNNING, controller.heartbeatTimeline.getStatus());
                         assertEquals(3000, controller.heartbeatTimeline.getKeyFrames().getFirst().getTime().toMillis());
