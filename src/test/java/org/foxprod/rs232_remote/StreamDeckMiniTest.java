@@ -310,6 +310,7 @@ class StreamDeckMiniTest {
             deck.awaitUploaded(WRITES_PER_PAGE);
 
             service.close();
+            verify(deck.device, never()).sendFeatureReport(any(byte[].class), anyByte());
             verify(deck.device, times(1)).close();
             verify(deck.services, times(1)).shutdown();
 

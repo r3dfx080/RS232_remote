@@ -52,9 +52,6 @@ final class StreamDeckMini implements AutoCloseable {
     /** Input reports are a report ID plus 64 state bytes. */
     private static final int REPORT_BUFFER_BYTES = 1 + 64;
 
-    private static final byte LOGO_REPORT_ID = 0x0B;
-    private static final byte LOGO_COMMAND = 0x63;
-
     private final IntConsumer onAction;
     private final Executor callbacks;
     private final Supplier<HidServices> serviceFactory;
@@ -336,25 +333,14 @@ final class StreamDeckMini implements AutoCloseable {
         closeQuietly(current);
     }
 
-    /** Restores the logo, then closes the device. */
+    /** Releases the device without replacing its last displayed images. */
     private void releaseDevice() {
         HidDevice current = device;
         device = null;
         if (current == null) {
             return;
         }
-        restoreLogo(current);
         closeQuietly(current);
-    }
-
-    private void restoreLogo(HidDevice current) {
-        try {
-            byte[] payload = new byte[16];
-            payload[0] = LOGO_COMMAND;
-            current.sendFeatureReport(payload, LOGO_REPORT_ID);
-        } catch (Throwable ignored) {
-            // Restoring the logo is cosmetic; never let it block cleanup.
-        }
     }
 
     private void closeQuietly(HidDevice current) {
