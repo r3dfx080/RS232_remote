@@ -2,6 +2,7 @@ package org.foxprod.rs232_remote;
 
 import org.junit.jupiter.api.Test;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.HashMap;
@@ -9,48 +10,56 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Layout tests for the twelve key faces. Everything here is deterministic because
- * the label font is bundled with the application.
+ * Layout and ordering tests for the twelve key faces. Page-1 artwork is injected,
+ * so these tests neither need image files nor depend on the artwork that ships.
  */
 class StreamDeckFacesTest {
 
     private static final int SIZE = StreamDeckMiniProtocol.KEY_PIXELS;
 
     @Test
-    void buildsTwelveEightyPixelFaces() throws IOException {
-        List<BufferedImage> faces = StreamDeckFaces.build(config("REW SCAN", "SH <<", "SH >>", "FF SCAN", "RESET"));
+    void buildsTwelveFacesInDisplayOrder() throws IOException {
+        List<BufferedImage> faces = StreamDeckFaces.build(config(), StreamDeckFacesTest::fixture);
 
-        assertEquals(StreamDeckFaces.FACE_COUNT, faces.size());
         assertEquals(12, faces.size());
+        assertEquals(StreamDeckFaces.FACE_COUNT, faces.size());
         for (int i = 0; i < faces.size(); i++) {
             assertEquals(SIZE, faces.get(i).getWidth(), "face " + i + " width");
             assertEquals(SIZE, faces.get(i).getHeight(), "face " + i + " height");
         }
+
+        // Page 1: eject, rew, play, ff, stop, page2. Back sits last, at page 2 bottom-right.
+        List<String> artworkOrder = List.of("eject", "rew", "play", "ff", "stop", "page2");
+        for (int i = 0; i < artworkOrder.size(); i++) {
+            assertEquals(fixture(artworkOrder.get(i)).getRGB(0, 0), faces.get(i).getRGB(0, 0),
+                    "face " + i + " must be the " + artworkOrder.get(i) + " artwork");
+        }
+        assertEquals(fixture("back").getRGB(0, 0), faces.get(11).getRGB(0, 0),
+                "face 11 must be the back artwork");
     }
 
     @Test
-    void pageOneIconsAreNormalisedToWhiteOnBlack() throws IOException {
-        List<BufferedImage> faces = StreamDeckFaces.build(Map.of());
+    void artworkIsUsedWithoutTintingOrResizing() throws IOException {
+        BufferedImage marked = new BufferedImage(SIZE, SIZE, BufferedImage.TYPE_INT_ARGB);
+        marked.setRGB(3, 7, 0xFF3366CC);
+        marked.setRGB(70, 12, 0x80FF00FF);
 
-        // The desktop artwork mixes white glyphs (eject, stop) with black ones
-        // (rew, play, ff); every key face must still show a visible white glyph.
-        for (int i = 0; i < 5; i++) {
-            int ink = whitePixels(faces.get(i));
-            assertTrue(ink > 100, "face " + i + " must draw a white glyph");
-            assertTrue(ink < SIZE * SIZE, "face " + i + " must not be a solid white tile");
-        }
+        List<BufferedImage> faces = StreamDeckFaces.build(config(),
+                name -> "eject".equals(name) ? marked : fixture(name));
+
+        assertEquals(0xFF3366CC, faces.get(0).getRGB(3, 7), "colours must survive untouched");
+        assertEquals(0x80FF00FF, faces.get(0).getRGB(70, 12), "alpha must survive untouched");
     }
 
     @Test
     void customButtonNamesComeFromConfig() throws IOException {
-        BufferedImage first = StreamDeckFaces.build(config("REW SCAN", "", "", "", "")).get(6);
-        BufferedImage second = StreamDeckFaces.build(config("FF SCAN", "", "", "", "")).get(6);
+        BufferedImage first = StreamDeckFaces.build(config("REW SCAN", "", "", "", ""), StreamDeckFacesTest::fixture).get(6);
+        BufferedImage second = StreamDeckFaces.build(config("FF SCAN", "", "", "", ""), StreamDeckFacesTest::fixture).get(6);
 
         assertNotEquals(pixelsOf(first), pixelsOf(second),
                 "a different configured name must produce a different face");
@@ -69,11 +78,28 @@ class StreamDeckFacesTest {
     }
 
     @Test
+    void missingArtworkNamesTheExpectedFile() {
+        IOException error = assertThrows(IOException.class, () -> StreamDeckFaces.build(config(),
+                name -> "ff".equals(name) ? null : fixture(name)));
+
+        assertTrue(error.getMessage().contains("ff.png"), "message must name the file: " + error.getMessage());
+    }
+
+    @Test
+    void wronglySizedArtworkIsRejectedRatherThanScaled() {
+        IOException error = assertThrows(IOException.class, () -> StreamDeckFaces.build(config(),
+                name -> new BufferedImage(512, 512, BufferedImage.TYPE_INT_ARGB)));
+
+        assertTrue(error.getMessage().contains("80x80"), "message must name the required size: " + error.getMessage());
+        assertTrue(error.getMessage().contains("512x512"), "message must name the actual size: " + error.getMessage());
+    }
+
+    @Test
     void longLabelsWrapInsteadOfOverflowing() {
         for (String label : List.of("REW SCAN", "SH >>", "FF SCAN", "PAGE 2", "BACK", "BTN 1")) {
             BufferedImage face = StreamDeckFaces.textFace(label);
             assertTrue(whitePixels(face) > 20, "\"" + label + "\" must render visible ink");
-            assertEquals(0, nonBlackPixels(face, 4), "\"" + label + "\" must stay inside its margins");
+            assertEquals(0, litPixelsInBorder(face, 4), "\"" + label + "\" must stay inside its margins");
         }
     }
 
@@ -82,7 +108,7 @@ class StreamDeckFacesTest {
         BufferedImage face = StreamDeckFaces.textFace("SUPERCALIFRAGILISTIC");
 
         assertTrue(whitePixels(face) > 20, "a long single word must still draw something");
-        assertEquals(0, nonBlackPixels(face, 4), "the shortened word must stay inside its margins");
+        assertEquals(0, litPixelsInBorder(face, 4), "the shortened word must stay inside its margins");
     }
 
     @Test
@@ -93,19 +119,30 @@ class StreamDeckFacesTest {
         assertTrue(whitePixels(face) > 0, "an empty label falls back to a placeholder glyph");
     }
 
-    @Test
-    void unknownIconIsReported() {
-        assertThrows(IOException.class, () -> StreamDeckFaces.iconFace("no-such-icon"));
+    private static Map<String, String> config(String... names) {
+        Map<String, String> config = new HashMap<>();
+        String[] defaults = {"REW SCAN", "SH <<", "SH >>", "FF SCAN", "RESET"};
+        for (int i = 0; i < 5; i++) {
+            String name = i < names.length ? names[i] : defaults[i];
+            config.put("button" + (i + 1) + "_name", name);
+        }
+        return config;
     }
 
-    private static Map<String, String> config(String b1, String b2, String b3, String b4, String b5) {
-        Map<String, String> config = new HashMap<>();
-        config.put("button1_name", b1);
-        config.put("button2_name", b2);
-        config.put("button3_name", b3);
-        config.put("button4_name", b4);
-        config.put("button5_name", b5);
-        return config;
+    private static Map<String, String> config() {
+        return config(new String[0]);
+    }
+
+    /** A distinct flat colour per artwork name, so ordering is observable. */
+    private static BufferedImage fixture(String name) {
+        BufferedImage image = new BufferedImage(SIZE, SIZE, BufferedImage.TYPE_INT_ARGB);
+        Color colour = Color.getHSBColor((Math.abs(name.hashCode()) % 360) / 360f, 0.7f, 0.8f);
+        for (int y = 0; y < SIZE; y++) {
+            for (int x = 0; x < SIZE; x++) {
+                image.setRGB(x, y, colour.getRGB());
+            }
+        }
+        return image;
     }
 
     private static int whitePixels(BufferedImage face) {
@@ -121,7 +158,7 @@ class StreamDeckFacesTest {
     }
 
     /** Counts lit pixels inside a border of the given thickness. */
-    private static int nonBlackPixels(BufferedImage face, int border) {
+    private static int litPixelsInBorder(BufferedImage face, int border) {
         int count = 0;
         for (int y = 0; y < face.getHeight(); y++) {
             for (int x = 0; x < face.getWidth(); x++) {
@@ -141,7 +178,6 @@ class StreamDeckFacesTest {
         int red = (rgb >> 16) & 0xFF;
         int green = (rgb >> 8) & 0xFF;
         int blue = rgb & 0xFF;
-        // Text faces are opaque; icon faces keep alpha, so weight by coverage.
         return ((red + green + blue) / 3) * alpha / 255;
     }
 

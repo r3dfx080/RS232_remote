@@ -1,7 +1,6 @@
 package org.foxprod.rs232_remote;
 
 import javax.imageio.ImageIO;
-import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontFormatException;
@@ -16,29 +15,26 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Builds the twelve key faces shown on the Stream Deck Mini.
+ * Builds the twelve key faces shown on the Stream Deck Mini, in display order.
  *
- * <p>Page one reuses the desktop transport icons as alpha masks, tinted white on
- * a black face, so all six keys look alike regardless of the colour each icon was
- * drawn in. Page two labels the user's custom buttons with the names from
- * {@code config.properties}, laid out and sized to fit an 80x80 key; the
- * page-one navigation key and the page-two back key are labelled the same way.
+ * <p>Seven faces come from prepared artwork under {@code streamdeck/}: the five
+ * transport keys, the page-2 navigation key and the page-2 back key. Artwork is
+ * used exactly as supplied - it must already be an upright 80x80 image, and its
+ * colours are left untouched. Transparent pixels reach the device as black.
  *
- * <p>Text uses a bundled font so the layout does not depend on the host's
- * installed fonts.
+ * <p>The five custom keys are labelled with the user's configured button titles
+ * ({@code button1_name} ... {@code button5_name}), because those names are not
+ * known in advance. The bundled font keeps that layout identical on every
+ * machine.
  */
 final class StreamDeckFaces {
 
     static final int FACE_COUNT = 2 * StreamDeckMiniProtocol.KEY_COUNT;
 
-    private static final String RESOURCE_ROOT = "/org/foxprod/rs232_remote/";
-    private static final String FONT_RESOURCE = RESOURCE_ROOT + "streamdeck/DejaVuSans-Bold.ttf";
+    static final String RESOURCE_ROOT = "/org/foxprod/rs232_remote/streamdeck/";
 
-    /** Desktop artwork, reused as the five transport key faces. */
-    private static final String[] TRANSPORT_ICONS = {"eject", "rew", "play", "ff", "stop"};
-
-    private static final String PAGE_TWO_LABEL = "PAGE 2";
-    private static final String BACK_LABEL = "BACK";
+    /** Artwork filenames, in the order the keys appear on page 1, followed by "back". */
+    static final List<String> ARTWORK = List.of("eject", "rew", "play", "ff", "stop", "page2", "back");
 
     private static final int SIZE = StreamDeckMiniProtocol.KEY_PIXELS;
     private static final int PADDING = 5;
@@ -48,29 +44,40 @@ final class StreamDeckFaces {
 
     private static final Color INK = Color.WHITE;
     private static final Color BACKDROP = Color.BLACK;
+    private static final String FONT_RESOURCE = RESOURCE_ROOT + "DejaVuSans-Bold.ttf";
 
     private static Font baseFont;
 
     private StreamDeckFaces() {
     }
 
-    /**
-     * Builds every key face in display order: page one (eject, rewind, play,
-     * fast-forward, stop, page two) followed by page two (custom 1-5, back).
-     *
-     * @param config the loaded configuration, used for the custom button names;
-     *               may be {@code null}
-     */
+    /** Supplies one piece of prepared artwork by key name, without its extension. */
+    @FunctionalInterface
+    interface Artwork {
+        /** @return the image, or {@code null} when the artwork is absent */
+        BufferedImage load(String name) throws IOException;
+    }
+
+    /** Builds every face from the bundled artwork. */
     static List<BufferedImage> build(Map<String, String> config) throws IOException {
+        return build(config, StreamDeckFaces::bundled);
+    }
+
+    /**
+     * Builds every face, taking page-1 artwork from the supplied source.
+     *
+     * @param config   the loaded configuration, used for the custom button names
+     * @param artwork  the page-1 artwork source; lets tests run without image files
+     */
+    static List<BufferedImage> build(Map<String, String> config, Artwork artwork) throws IOException {
         List<BufferedImage> faces = new ArrayList<>(FACE_COUNT);
-        for (String icon : TRANSPORT_ICONS) {
-            faces.add(iconFace(icon));
+        for (String name : ARTWORK.subList(0, 6)) {
+            faces.add(artworkFace(artwork, name));
         }
-        faces.add(textFace(PAGE_TWO_LABEL));
         for (int button = 1; button <= 5; button++) {
             faces.add(textFace(customName(config, button)));
         }
-        faces.add(textFace(BACK_LABEL));
+        faces.add(artworkFace(artwork, "back"));
         return faces;
     }
 
@@ -83,13 +90,30 @@ final class StreamDeckFaces {
         return name.trim();
     }
 
-    /** Loads a desktop icon and renders it as a white glyph on black. */
-    static BufferedImage iconFace(String name) throws IOException {
-        BufferedImage source = ImageIO.read(open(RESOURCE_ROOT + name + ".png"));
-        if (source == null) {
-            throw new IOException("Stream Deck icon is unreadable: " + name + ".png");
+    /**
+     * Loads one prepared key image. The image is returned untouched: no scaling,
+     * no tinting, no cropping. Incorrect dimensions are rejected rather than
+     * silently corrected, so a wrong export cannot ship unnoticed.
+     */
+    private static BufferedImage artworkFace(Artwork artwork, String name) throws IOException {
+        BufferedImage image = artwork.load(name);
+        if (image == null) {
+            throw new IOException("Missing Stream Deck key artwork: " + RESOURCE_ROOT + name + ".png");
         }
-        return tintWhite(downScale(source));
+        if (image.getWidth() != SIZE || image.getHeight() != SIZE) {
+            throw new IOException("Stream Deck key artwork " + name + ".png must be "
+                    + SIZE + "x" + SIZE + " pixels, but was "
+                    + image.getWidth() + "x" + image.getHeight() + ".");
+        }
+        return image;
+    }
+
+    /** Reads artwork from the application's own resources. */
+    private static BufferedImage bundled(String name) throws IOException {
+        String resource = RESOURCE_ROOT + name + ".png";
+        try (InputStream stream = StreamDeckFaces.class.getResourceAsStream(resource)) {
+            return stream == null ? null : ImageIO.read(stream);
+        }
     }
 
     /** Renders a label centred on a black key face, wrapped and sized to fit. */
@@ -187,48 +211,12 @@ final class StreamDeckFaces {
         return end == 0 ? ellipsis : text.substring(0, end).trim() + ellipsis;
     }
 
-    /** Progressive halving keeps glyph edges clean when 512 px artwork becomes 80 px. */
-    private static BufferedImage downScale(BufferedImage source) {
-        BufferedImage current = source;
-        int width = source.getWidth();
-        int height = source.getHeight();
-        while (width > SIZE * 2) {
-            width = Math.max(SIZE, width / 2);
-            height = Math.max(SIZE, height / 2);
-            current = drawScaled(current, width, height);
-        }
-        return drawScaled(current, SIZE, SIZE);
-    }
-
-    private static BufferedImage drawScaled(BufferedImage source, int width, int height) {
-        BufferedImage target = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D graphics = target.createGraphics();
-        try {
-            graphics.setComposite(AlphaComposite.Src);
-            graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-            graphics.drawImage(source, 0, 0, width, height, null);
-        } finally {
-            graphics.dispose();
-        }
-        return target;
-    }
-
-    /** Replaces the artwork's colour with white, keeping its shape from the alpha channel. */
-    private static BufferedImage tintWhite(BufferedImage source) {
-        BufferedImage tinted = new BufferedImage(SIZE, SIZE, BufferedImage.TYPE_INT_ARGB);
-        for (int y = 0; y < SIZE; y++) {
-            for (int x = 0; x < SIZE; x++) {
-                int alpha = source.getRGB(x, y) >>> 24;
-                tinted.setRGB(x, y, (alpha << 24) | 0x00FFFFFF);
-            }
-        }
-        return tinted;
-    }
-
     private static synchronized Font font(int size) {
         if (baseFont == null) {
-            try (InputStream stream = open(FONT_RESOURCE)) {
+            try (InputStream stream = StreamDeckFaces.class.getResourceAsStream(FONT_RESOURCE)) {
+                if (stream == null) {
+                    throw new IOException("Missing classpath resource: " + FONT_RESOURCE);
+                }
                 baseFont = Font.createFont(Font.TRUETYPE_FONT, stream);
             } catch (IOException | FontFormatException e) {
                 throw new IllegalStateException("Could not load the bundled key face font " + FONT_RESOURCE, e);
@@ -245,14 +233,6 @@ final class StreamDeckFaces {
         } finally {
             graphics.dispose();
         }
-    }
-
-    private static InputStream open(String resource) throws IOException {
-        InputStream stream = StreamDeckFaces.class.getResourceAsStream(resource);
-        if (stream == null) {
-            throw new IOException("Missing classpath resource: " + resource);
-        }
-        return stream;
     }
 
     /** A font size and the lines that fit inside a key. */
