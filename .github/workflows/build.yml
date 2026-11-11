@@ -1,0 +1,28 @@
+name: Build
+
+on: push
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Test and package
+        run: .\gradlew.bat --no-daemon packageZip
+
+      - name: Upload Windows app
+        uses: actions/upload-artifact@v4
+        with:
+          name: RS232_remote-windows-${{ github.sha }}
+          path: build/distributions/RS232_remote-*-win.zip
+          if-no-files-found: error
