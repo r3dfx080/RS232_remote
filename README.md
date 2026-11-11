@@ -1,4 +1,5 @@
 # Overview
+
 This is a software RS-232 remote aimed towards VCRs that don't have proper RS-422 connection
 
 # Features
@@ -13,14 +14,13 @@ This is a software RS-232 remote aimed towards VCRs that don't have proper RS-42
 
 This remote's default layout uses _Sony UVW-1200_ Betacam SP VCR command set. 
 
-<img width="844" height="482" alt="uvw1200" src="https://github.com/user-attachments/assets/0c51ad49-b7eb-4ba0-96a7-ab3c1a3151f0" />
+![main-window.jpg](assets/main-window.jpg)
 
 User editable settings are stored in **config.properties**
 
 The default button order is:
 
-<img width="841" height="429" alt="def" src="https://github.com/user-attachments/assets/66077ba7-b383-4577-8425-29d77c1f62b4" />
-
+![default-layout.jpg](assets/default-layout.jpg)
 
 ## Customization
 
@@ -57,5 +57,4 @@ Selected port will be opened **automatically** if you press any button. You will
 
 For example:
 
-<img width="632" height="311" alt="err" src="https://github.com/user-attachments/assets/fadab213-a1f7-4614-b5ed-6eb3606e530e" />
-
+![error-example.JPG](assets/error-example.jpg)
